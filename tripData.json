@@ -1,0 +1,64 @@
+[
+  {
+    "id": "1",
+    "name": "Colorado Tour",
+    "leaveDate": "10/20",
+    "returnDate": "10/27",
+    "year": "2022",
+    "days": [
+      {
+        "id": "1",
+        "events": [
+          {
+            "id": "1",
+            "name": "Arrive at Craft Coffee Colorado",
+            "time": "10:30",
+            "duration": 30,
+            "data": "Do Something cool Incididunt aliquip do irure do Lorem ea aliquip laborum nulla.",
+            "attachment": null
+          },
+          {
+            "id": "2",
+            "name": "Arrive at Craft Coffee Colorado",
+            "time": "10:30",
+            "duration": 30,
+            "data": "Do Something cool Incididunt aliquip do irure do Lorem ea aliquip laborum nulla.",
+            "attachment": null
+          },
+          {
+            "id": "3",
+            "name": "Lunch",
+            "time": "10:30",
+            "duration": 45,
+            "data": "Do Something cool Incididunt aliquip do irure do Lorem ea aliquip laborum nulla.",
+            "attachment": null
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "events": [
+          {
+            "id": "1",
+            "name": "Arrive at Craft Coffee Colorado",
+            "duration": 30,
+            "data": "Do Something cool Incididunt aliquip do irure do Lorem ea aliquip laborum nulla.",
+            "attachment": null
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "events": [
+          {
+            "id": "1",
+            "name": "Arrive at Craft Coffee Colorado",
+            "duration": 30,
+            "data": "Do Something cool Incididunt aliquip do irure do Lorem ea aliquip laborum nulla.",
+            "attachment": null
+          }
+        ]
+      }
+    ]
+  }
+]
