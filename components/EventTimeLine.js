@@ -1,7 +1,7 @@
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import React, { useState } from 'react';
 
-/*
+/**
 ------------------------------------------------------------------------------------------------
 DESCRIPTION:
 - Blue timeLine on the left side of the screen.
@@ -30,15 +30,15 @@ export default function EventTimeLine({ children, item, events, date }) {
   const now = new Date();
   let currentTime = now.getTime();
 
-  // Check if this item is the last in the event list
+  /** Check if this item is the last in the event list */
   const notLastItem = () => {
     return events.indexOf(item) + 1 < events.length;
   };
 
-  // Temporary date object
+  /** Temporary date object */
   let tempSplitDate = date.toString().split(' ');
 
-  // Current time
+  /** Current time */
   tempSplitDate[4] = item.startTime;
   const thisTime = new Date(tempSplitDate.join(' ')).getTime();
 
@@ -46,7 +46,7 @@ export default function EventTimeLine({ children, item, events, date }) {
   tempSplitDate[4] = notLastItem() ? events[events.indexOf(item) + 1].startTime : '';
   const nextTime = new Date(tempSplitDate.join(' ')).getTime();
 
-  /* 
+  /**
     Returns the difference in time between the currentTime and nextTime. 
   */
   const getTimeDifference = () => {
@@ -55,7 +55,7 @@ export default function EventTimeLine({ children, item, events, date }) {
     return difference > minimumDiff ? difference * 30 : 1;
   };
 
-  /* 
+  /** 
     Returns the percent of time of the current time relative to the range of the current item and the next.
   */
   const getPercentageOfTimeRange = () => {
@@ -65,7 +65,7 @@ export default function EventTimeLine({ children, item, events, date }) {
     return 1 - percent;
   };
 
-  /* 
+  /**  
     Returns the size of the current item's line.
     If the time range of this item and the next is in the:
     -- past: return 1, 
@@ -79,13 +79,13 @@ export default function EventTimeLine({ children, item, events, date }) {
     return -1;
   };
 
-  // Return remaining percentage of the time range.
+  /** Return remaining percentage of the time range */
   const remaining = () => {
     // 100% - 75% = 35%
     return 1 - getLineSize();
   };
 
-  /* 
+  /** 
     Returns the start time of the current event 
     in a readable 12-hour time format.
     Includes AM or PM time stamps.
@@ -109,7 +109,7 @@ export default function EventTimeLine({ children, item, events, date }) {
     return `${hour}:${item.startTime.split(':')[1].padStart(2, '0')} ${am}`;
   };
 
-  // Set the dot color based on if the events start time is passed or not.
+  /** Set the dot color based on if the events start time is passed or not. */
   const setDotColor = () => {
     if (newColorValue != 100 && currentTime >= thisTime) {
       setNewColorValue(100);
@@ -119,14 +119,14 @@ export default function EventTimeLine({ children, item, events, date }) {
 
   setDotColor();
 
-  // Animates the dot color changes
+  /** Animates the dot color changes */
   Animated.timing(animation, {
     toValue: newColorValue,
     useNativeDriver: false,
     duration: 300,
   }).start();
 
-  /* 
+  /**
   
   RETURN 
   
@@ -172,7 +172,9 @@ export default function EventTimeLine({ children, item, events, date }) {
     </Animated.View>
   );
 }
-
+/**
+ * Styles for this view
+ */
 const styles = StyleSheet.create({
   currentTimeLine: {
     position: 'absolute',

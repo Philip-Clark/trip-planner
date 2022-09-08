@@ -5,21 +5,10 @@ import Header from './Header';
 import { getData, storeData } from './dataHandler';
 import SlideInView from './slideView';
 
-/**
- * =================
- * TRIPS DISPLAY
- * =================
- * Displays a list of all the trips
- *
- * Allows for trip creation
- *
- */
 export default function Trips({ navigation }) {
-  // Declare variables
   const [data, setData] = useState([]);
   const [trace, setTrace] = useState({ tripID: '', dayID: '', eventID: '' });
 
-  // Declare function to be called when trip is clicked
   const navigateToTrip = async (tripData) => {
     navigation.navigate('Trip', {
       tripData: tripData,

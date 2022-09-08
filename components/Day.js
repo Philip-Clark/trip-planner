@@ -1,28 +1,45 @@
-import { Animated, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useState } from 'react';
+import EventTimeLine from './EventTimeLine';
+import { getData } from './dataHandler';
+import SlideInView from './slideView';
 import Header from './Header';
 
-import React, { useEffect, useState } from 'react';
-import { getData } from './dataHandler';
-import { useFocusEffect } from '@react-navigation/native';
-import SlideInView from './slideView';
-import { LinearGradient } from 'expo-linear-gradient';
-import EventTimeLine from './EventTimeLine';
-
+/**
+------------------------------------------------------------------------------------------------
+DESCRIPTION:
+- Day view that displays the events for the day
+------------------------------------------------------------------------------------------------
+INPUT PARAMETERS:
+- Route > to access the params passed with navigation
+- Navigation > to pass to navigation events.
+------------------------------------------------------------------------------------------------
+*/
 export default function Day({ route, navigation }) {
-  const [dayData, setDayData] = useState({});
   const [tripName, setTripName] = useState('');
+  const [dayData, setDayData] = useState({});
   const [events, setEvents] = useState([]);
-  const [color, setColor] = useState('#000000');
   const [time, setTime] = useState();
   const trace = route.params.trace;
 
+  /**
+   * Gets the data from the data handler, then sets the "dayData", "tripName", and "events" state variables
+   */
   const updateData = () => {
     console.log('update Data in Day');
 
     getData().then((response) => {
       setDayData(response[trace.tripID - 1].days[trace.dayID - 1]);
       setTripName(response[trace.tripID - 1].name);
+
+      /**
+       * Slightly messy way of doing this, but it works.
+       * Set the events to the sorted by startTime list of events.
+       */
       setEvents(
+        /* Sorting the events by start time. */
         response[trace.tripID - 1].days[trace.dayID - 1].events.sort(
           (a, b) =>
             parseFloat(a.startTime.split(/[: ]+/)[0]) +
@@ -36,19 +53,29 @@ export default function Day({ route, navigation }) {
     });
   };
 
+  /* A hook that is called when the screen is focused. */
   useFocusEffect(
     React.useCallback(() => {
       updateData();
     }, [])
   );
 
+  /* Setting an interval to update the time every 15 seconds. */
   useEffect(() => {
     const interval = setInterval(() => setTime(Date.now()), 15000);
+
+    /* A cleanup function that is called when the component is unmounted. */
     return () => {
       clearInterval(interval);
     };
   }, [15000]);
 
+  /**
+   * "navigateTo" is a function that takes two parameters, "location" and "eventData", and then
+   * navigates to the location with the eventData.
+   * @param location - the name of the screen you want to navigate to
+   * @param eventData - this is the data that is passed to the function.
+   */
   const navigateTo = async (location, eventData) => {
     route.params.trace.eventID = eventData.id;
     navigation.navigate(location, {
@@ -60,24 +87,29 @@ export default function Day({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* A custom component that is used to display the header. */}
       <Header
         title={`Day ${dayData.id}`}
         backTo={'Trip'}
         navigation={navigation}
         subtitle={tripName}
       />
+      {/*A list of events for the day. */}
       <FlatList
         style={styles.days}
         data={events}
         contentContainerStyle={{ paddingBottom: 300, paddingTop: 10 }}
         renderItem={({ item }) => (
-          <SlideInView duration={400} start={50} end={0} offset={events.indexOf(item)}>
+          /* A custom component that is used to animate the events. */
+          <SlideInView offset={events.indexOf(item)}>
             {/* EVENT */}
             <EventTimeLine item={item} events={events} date={route.params.date}>
               {/* EVENT CARD */}
               <TouchableOpacity style={styles.dayCard} onPress={() => navigateTo('Event', item)}>
                 <View style={styles.dayItem}>
+                  {/* The name of the event. */}
                   <Text style={styles.dayText}>{item.name}</Text>
+                  {/*  The duration of the event. */}
                   <Text style={styles.dayText}>
                     {item.duration.split(':')[0] > 0
                       ? item.duration.split(':')[0].replace(/\b0+/g, '') + 'h'
@@ -89,15 +121,13 @@ export default function Day({ route, navigation }) {
             </EventTimeLine>
           </SlideInView>
         )}
-      />
+      ></FlatList>
+
+      {/* Fade out list view */}
       <LinearGradient colors={['rgba(255, 255, 255, 0)', '#ffffff']} style={styles.gradient} />
-      <TouchableOpacity
-        onPress={() =>
-          navigateTo('AddEvent', {
-            dayData: dayData,
-          })
-        }
-      >
+
+      {/* Add event Button */}
+      <TouchableOpacity onPress={() => navigateTo('AddEvent', { dayData: dayData })}>
         <View style={styles.addEvent}>
           <Text style={styles.add}>Add Event</Text>
         </View>
@@ -106,6 +136,7 @@ export default function Day({ route, navigation }) {
   );
 }
 
+/* A style sheet. */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -131,7 +162,6 @@ const styles = StyleSheet.create({
     ],
 
     zIndex: 10,
-
     width: 20,
     height: 2,
     backgroundColor: '#67dfe8',
@@ -171,13 +201,6 @@ const styles = StyleSheet.create({
     color: '#5c5c5c',
   },
 
-  timeText: {
-    fontSize: 16,
-    width: 60,
-    color: '#5c5c5c',
-    alignSelf: 'center',
-  },
-
   dayCard: {
     flex: 1,
   },
@@ -187,26 +210,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignContent: 'center',
-  },
-
-  dot: {
-    height: 10,
-    width: 10,
-    margin: 10,
-    alignSelf: 'center',
-    borderRadius: 50000,
-    // backgroundColor: '#7ff8f8',
-    backgroundColor: '#f5f5f5ff',
-  },
-
-  line: {
-    position: 'relative',
-    alignSelf: 'center',
-    top: 10,
-    borderColor: '#f5f5f5ff',
-    backgroundColor: '#f5f5f5ff',
-    width: 2,
-    height: 60,
   },
 
   add: {
