@@ -83,7 +83,7 @@ export default function Trip({ route, navigation }) {
         title={tripData.name}
         backTo={'Trip'}
         navigation={navigation}
-        deleteHandler={deleteTrip}
+        // deleteHandler={deleteTrip}
       />
       {/* Rendering a list of days. */}
       <FlatList

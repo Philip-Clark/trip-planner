@@ -7,6 +7,8 @@ import Event from './components/Event';
 import AddEvent from './components/AddEvent';
 import AddTrip from './components/AddTrip';
 import { Animated } from 'react-native';
+import { MenuProvider } from 'react-native-popup-menu';
+import AddTravel from './components/AddTravel';
 
 export default function App() {
   const forSlide = ({ current, next, inverted, layouts: { screen } }) => {
@@ -88,39 +90,50 @@ export default function App() {
   const Stack = createStackNavigator();
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Trips"
-          component={Trips}
-          options={{ title: 'Trips', headerShown: false, cardStyleInterpolator: forSlide }}
-        />
-        <Stack.Screen
-          name="Trip"
-          component={Trip}
-          options={{ title: 'Trip', headerShown: false, cardStyleInterpolator: forSlide }}
-        />
-        <Stack.Screen
-          name="Day"
-          component={Day}
-          options={{ title: 'Day', headerShown: false, cardStyleInterpolator: forSlide }}
-        />
-        <Stack.Screen
-          name="AddEvent"
-          component={AddEvent}
-          options={{ title: 'NewEvent', headerShown: false, cardStyleInterpolator: forSlideHori }}
-        />
-        <Stack.Screen
-          name="Event"
-          component={Event}
-          options={{ title: 'Event', headerShown: false, cardStyleInterpolator: forSlide }}
-        />
-        <Stack.Screen
-          name="AddTrip"
-          component={AddTrip}
-          options={{ title: 'AddTrip', headerShown: false, cardStyleInterpolator: forSlideHori }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <MenuProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Trips"
+            component={Trips}
+            options={{ title: 'Trips', headerShown: false, cardStyleInterpolator: forSlide }}
+          />
+          <Stack.Screen
+            name="Trip"
+            component={Trip}
+            options={{ title: 'Trip', headerShown: false, cardStyleInterpolator: forSlide }}
+          />
+          <Stack.Screen
+            name="Day"
+            component={Day}
+            options={{ title: 'Day', headerShown: false, cardStyleInterpolator: forSlide }}
+          />
+          <Stack.Screen
+            name="AddEvent"
+            component={AddEvent}
+            options={{ title: 'NewEvent', headerShown: false, cardStyleInterpolator: forSlideHori }}
+          />
+          <Stack.Screen
+            name="AddTravel"
+            component={AddTravel}
+            options={{
+              title: 'TravelTime',
+              headerShown: false,
+              cardStyleInterpolator: forSlideHori,
+            }}
+          />
+          <Stack.Screen
+            name="Event"
+            component={Event}
+            options={{ title: 'Event', headerShown: false, cardStyleInterpolator: forSlide }}
+          />
+          <Stack.Screen
+            name="AddTrip"
+            component={AddTrip}
+            options={{ title: 'AddTrip', headerShown: false, cardStyleInterpolator: forSlideHori }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </MenuProvider>
   );
 }

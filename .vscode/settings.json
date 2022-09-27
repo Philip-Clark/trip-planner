@@ -1,8 +1,8 @@
 {
   "docwriter.style": "Auto-detect",
-  "docwriter.progress.trackFunctions": false,
-  "docwriter.progress.trackClasses": false,
-  "docwriter.progress.trackTypes": false,
+  "docwriter.progress.trackFunctions": true,
+  "docwriter.progress.trackClasses": true,
+  "docwriter.progress.trackTypes": true,
   "docwriter.hotkey.windows": "Alt + .",
-  "docwriter.progress.trackMethods": false
+  "docwriter.progress.trackMethods": true
 }

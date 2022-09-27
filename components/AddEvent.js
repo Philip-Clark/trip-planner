@@ -3,6 +3,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import DatePicker from 'react-native-modern-datepicker';
 import React, { useState } from 'react';
 import addItem from './dataHandler';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
  * This view is used to add an event to the database
@@ -10,20 +11,23 @@ import addItem from './dataHandler';
  */
 export default function AddEvent({ navigation, route }) {
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [showDeparturePicker, setShowDeparturePicker] = useState(false);
   const [description, setDescription] = useState('');
-  const [duration, setDuration] = useState('00:30');
+  const [departure, setDeparture] = useState('');
   const [startTime, setStartTime] = useState('');
   const [title, setTitle] = useState('');
 
   /**
-   * When the user selects a duration, hide the duration picker and set the duration to the selected
+   * When the user selects a departure, hide the departure picker and set the departure to the selected
    * time.
    * @param selectedTime - The time that was selected by the user.
    */
-  const handleDurationSelection = (selectedTime) => {
-    setShowDurationPicker(false);
-    setDuration(selectedTime);
+  const onDepartureTimeChange = (event, selectedDate) => {
+    const date = new Date(selectedDate);
+    console.log(selectedDate);
+
+    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
+    setShowDeparturePicker(false);
   };
 
   /**
@@ -67,16 +71,22 @@ export default function AddEvent({ navigation, route }) {
   };
 
   /**
-   * If the title, description, and duration are not empty, then add the item to the database and go back
+   * If the title, description, and departure are not empty, then add the item to the database and go back
    * to the previous screen.
    *
    * If any of the fields are empty, then alert the user to fill out all fields.
    */
   const saveAndExit = () => {
-    if (title !== '' && description !== '' && duration !== '') {
+    if (title !== '' && description !== '' && departure !== '') {
       addItem(
         'event',
-        { title: title, description: description, time: duration, startTime: startTime },
+        {
+          title: title,
+          description: description,
+          time: departure,
+          startTime: startTime,
+          type: 'event',
+        },
         route.params.trace,
         () => navigation.goBack(null)
       );
@@ -103,28 +113,7 @@ export default function AddEvent({ navigation, route }) {
           console.log(input);
         }}
       />
-      {/* This is a button that sets the showPicker state to true when pressed. */}
-      <TouchableOpacity style={styles.dateInput} onPress={() => setShowDurationPicker(true)}>
-        <Text style={styles.dateInputText}>{duration != '' ? duration : 'Duration'}</Text>
-      </TouchableOpacity>
-      {/* A modal that is used to display the time picker for the event duration. */}
-      <Modal
-        animationType="fade"
-        transparent={false}
-        visible={showDurationPicker}
-        onRequestClose={() => {
-          setShowDurationPicker(false);
-        }}
-      >
-        <View style={styles.modalContent}>
-          <DatePicker
-            style={styles.timePicker}
-            mode="time"
-            minuteInterval={5}
-            onTimeChange={(selectedTime) => handleDurationSelection(selectedTime)}
-          />
-        </View>
-      </Modal>
+
       {/* A button that sets the showStartTimePicker state to true when pressed. */}
       <TouchableOpacity
         style={styles.dateInput}
@@ -133,7 +122,8 @@ export default function AddEvent({ navigation, route }) {
         }}
       >
         <Text style={styles.dateInputText}>
-          {startTime != '' ? get12HourTime(startTime) : 'Start Time'}
+          <MaterialCommunityIcons name="clock" size={16} color="#5c5c5c" />
+          {startTime != '' ? get12HourTime(startTime) : ' Start Time'}
         </Text>
       </TouchableOpacity>
       {/* A conditional statement that renders the DateTimePicker component if the
@@ -145,6 +135,23 @@ export default function AddEvent({ navigation, route }) {
           mode={'time'}
           is24Hour={false}
           onChange={onStartTimeChange}
+        />
+      )}
+      {/* This is a button that sets the showPicker state to true when pressed. */}
+      <TouchableOpacity style={styles.dateInput} onPress={() => setShowDeparturePicker(true)}>
+        <Text style={styles.dateInputText}>
+          <MaterialCommunityIcons name="clock" size={16} color="#5c5c5c" />
+          {departure != '' ? get12HourTime(departure) : ' Departure Time'}
+        </Text>
+      </TouchableOpacity>
+      {/* A modal that is used to display the time picker for the event departure. */}
+      {showDeparturePicker && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={new Date('2000', '0', '01', '12', '00', '00', '00')}
+          mode={'time'}
+          is24Hour={false}
+          onChange={onDepartureTimeChange}
         />
       )}
       {/* A button that calls the done function when pressed. */}

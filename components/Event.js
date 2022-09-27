@@ -15,7 +15,7 @@ export default function Event({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <Header title={route.params.data.name} navigation={navigation} deleteHandler={deleteEvent} />
       <Text style={styles.text}>{route.params.data.data}</Text>
     </View>
@@ -27,7 +27,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
-    paddingTop: 50,
+    marginTop: 35,
+  },
+
+  editModeContainer: {
+    borderColor: '#67dfe8',
+    borderWidth: 5,
+    padding: 15,
   },
   text: {
     fontSize: 16,

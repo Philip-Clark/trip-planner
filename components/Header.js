@@ -1,6 +1,13 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-export default function Header({ title, navigation, back = true, deleteHandler, subtitle = '' }) {
+export default function Header({
+  children,
+  title,
+  navigation,
+  back = true,
+  deleteHandler,
+  subtitle = '',
+}) {
   return (
     <View style={styles.header}>
       {back ? (
@@ -33,6 +40,7 @@ export default function Header({ title, navigation, back = true, deleteHandler, 
       ) : (
         <></>
       )}
+      <View style={styles.right}>{children}</View>
     </View>
   );
 }
@@ -44,6 +52,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     paddingBottom: 10,
     marginTop: 10,
+  },
+  right: {
+    marginLeft: 'auto',
+    marginRight: 0,
+    justifyContent: 'center',
   },
 
   back: {

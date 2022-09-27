@@ -61,8 +61,10 @@ function addEvent(value, trace, data, callback) {
     id: eventId,
     name: value.title,
     data: value.description,
-    duration: value.time,
+    departure: value.time,
     startTime: value.startTime,
+    type: value.type,
+    duration: value.duration != null ? value.duration : 0,
   });
   storeData(data, callback);
   console.log('================= STORING DATA ======================');
