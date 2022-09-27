@@ -24,11 +24,12 @@ FUNCTIONS:
 - return()
 ------------------------------------------------------------------------------------------------
 */
-export default function EventTimeLine({ children, item, events, date }) {
+export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   const [newColorValue, setNewColorValue] = useState(0);
   const [animation] = useState(new Animated.Value(0));
   const now = new Date();
   let currentTime = now.getTime();
+  let events = eventUnsorted.filter((event) => event.type == 'event');
 
   /** Check if this item is the last in the event list */
   const notLastItem = () => {
@@ -153,7 +154,7 @@ export default function EventTimeLine({ children, item, events, date }) {
             <View
               style={[
                 styles.line,
-                { height: getLineSize() * (getTimeDifference() + 50) },
+                { height: getLineSize() * (getTimeDifference() + 66) },
                 { backgroundColor: '#7ff8f8' },
               ]}
             />
@@ -161,7 +162,7 @@ export default function EventTimeLine({ children, item, events, date }) {
             <View
               style={[
                 styles.line,
-                { height: (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + 50) },
+                { height: (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + 66) },
                 { backgroundColor: '#f5f5f5ff' },
               ]}
             />
