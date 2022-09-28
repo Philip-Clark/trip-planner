@@ -1,5 +1,6 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { editItem } from './dataHandler';
 export default function Header({
   children,
   title,
@@ -7,6 +8,8 @@ export default function Header({
   back = true,
   deleteHandler,
   subtitle = '',
+  editable,
+  route,
 }) {
   return (
     <View style={styles.header}>
@@ -19,7 +22,19 @@ export default function Header({
       )}
       <View style={styles.titles}>
         {subtitle != '' ? <Text style={styles.subTitle}>{subtitle}</Text> : <></>}
-        <Text style={styles.title}>{title}</Text>
+        {editable ? (
+          <TextInput
+            style={[styles.title, styles.editable]}
+            defaultValue={title}
+            onChangeText={(Text) => {
+              let dat = route.data;
+              dat.name = Text;
+              editItem('event', route.trace, dat, () => {});
+            }}
+          />
+        ) : (
+          <Text style={styles.title}>{title}</Text>
+        )}
       </View>
       {back ? (
         <TouchableOpacity
@@ -66,6 +81,7 @@ const styles = StyleSheet.create({
 
   titles: {
     marginLeft: 10,
+    width: '75%',
   },
 
   subTitle: {
@@ -74,6 +90,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
+  editable: {
+    borderColor: '#969696',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderRadius: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+  },
   title: {
     fontSize: 30,
     fontWeight: 'bold',

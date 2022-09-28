@@ -100,7 +100,7 @@ export default function AddTravel({ navigation, route }) {
         data={events}
         onSelect={(selectedItem, index) => {
           console.log(selectedItem);
-          setStartTime(selectedItem.startTime + 0.1);
+          setStartTime(selectedItem.startTime + '.1');
         }}
         buttonTextAfterSelection={(selectedItem, index) => {
           // text represented after item is selected

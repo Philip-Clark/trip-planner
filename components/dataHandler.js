@@ -45,6 +45,28 @@ export function removeItem(itemType, trace, item, callback) {
     }
   });
 }
+
+export function editItem(itemType, trace, newData, callback) {
+  getData().then((response) => {
+    switch (itemType) {
+      case 'trip':
+        editTrip(trace, response, newData, callback);
+        break;
+
+      case 'day':
+        editDay(trace, response, newData, callback);
+        break;
+      case 'event':
+        editEvent(trace, response, newData, callback);
+        break;
+
+      default:
+        console.log(itemType + ' Did not match allowed types. \n allowed types: trip, day, event');
+        break;
+    }
+  });
+}
+
 /**
  *
  * @param {{title: string, description: string, time: string,}} value
@@ -53,7 +75,7 @@ export function removeItem(itemType, trace, item, callback) {
 function addEvent(value, trace, data, callback) {
   const tripID = parseInt(trace.tripID) - 1;
   const dayID = parseInt(trace.dayID) - 1;
-  let eventId = parseInt(value.startTime.replace(':', ''));
+  let eventId = parseFloat(value.startTime.replace(':', ''));
 
   let eventArray = data[tripID].days[dayID].events;
 
@@ -125,7 +147,7 @@ function removeEvent(trace, data, item, callback) {
   const dayID = parseInt(trace.dayID) - 1;
 
   let eventArray = data[tripID].days[dayID].events;
-  console.log(item);
+  console.log(eventArray);
   console.log(
     eventArray.find((obj) => {
       return obj.id == trace.eventID;
@@ -178,6 +200,88 @@ export async function storeData(value, callback) {
     // saving error
     console.log(e);
   }
+}
+//  editEvent(trace, response, item, callback);
+function editEvent(trace, response, newData, callback) {
+  const tripID = parseInt(trace.tripID) - 1;
+  const dayID = parseInt(trace.dayID) - 1;
+
+  // console.log(response);
+  console.log(newData);
+
+  let eventArray = response[tripID].days[dayID].events;
+
+  let item =
+    eventArray[
+      eventArray.indexOf(
+        eventArray.find((obj) => {
+          return obj.id === trace.eventID;
+        })
+      )
+    ];
+
+  item.name = newData.name;
+  item.data = newData.data;
+  item.departure = newData.departure;
+  item.time = newData.startTime;
+  // data: value.description,
+  // departure: value.time,
+  // startTime: value.startTime,
+  // type: value.type,
+  // duration: value.duration != null ? value.duration : 0,
+
+  storeData(response, callback);
+  console.log('================= STORING DATA ======================');
+  console.log(data);
+  console.log('=====================================================');
+}
+
+function editDay(trace, data, callback) {
+  const tripID = parseInt(trace.tripID) - 1;
+  const dayID = parseInt(data[tripID].days.length + 1);
+
+  let dayArray = data[tripID].days;
+
+  dayArray.push({
+    id: dayID,
+    events: [],
+  });
+
+  console.log('================= STORING DATA ======================');
+  console.log(data);
+  console.log('=====================================================');
+  storeData(data, callback);
+}
+
+function editTrip(value, data, callback) {
+  const tripID = parseInt(data.length + 1);
+
+  data.push({
+    id: tripID,
+    name: value.name,
+    leaveDate: value.startDate,
+    returnDate: value.endDate,
+    days: [],
+  });
+
+  const startDate = value.startDate.split('/');
+  const endDate = value.endDate.split('/');
+
+  const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
+  const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
+
+  const differenceInMins = convertedEndDate.getTime() - convertedStartDate.getTime();
+
+  const differenceInDays = differenceInMins / (1000 * 3600 * 24);
+
+  for (let i = 0; i <= differenceInDays; i++) {
+    addDay({ tripID: tripID }, data, () => {});
+  }
+
+  console.log('================= STORING DATA ======================');
+  console.log(data);
+  console.log('=====================================================');
+  storeData(data, callback);
 }
 
 export async function getData() {

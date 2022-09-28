@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import EventTimeLine from './EventTimeLine';
-import { getData } from './dataHandler';
+import { getData, removeItem } from './dataHandler';
 import SlideInView from './slideView';
 import Header from './Header';
 
@@ -29,6 +29,7 @@ export default function Day({ route, navigation }) {
   const [editMode, setEditMode] = useState(false);
   const [expandAddMenu, setExpandAddMenu] = useState(false);
   const trace = route.params.trace;
+  const [refresh, setRefresh] = useState(0);
 
   /**
    * Gets the data from the data handler, then sets the "dayData", "tripName", and "events" state variables
@@ -75,6 +76,10 @@ export default function Day({ route, navigation }) {
       clearInterval(interval);
     };
   }, [15000]);
+
+  useEffect(() => {
+    updateData();
+  }, []);
 
   /**
    * "navigateTo" is a function that takes two parameters, "location" and "eventData", and then
@@ -172,14 +177,36 @@ export default function Day({ route, navigation }) {
                       </Text>
                     </View>
                   </TouchableOpacity>
-                  {events.indexOf(item) < events.length - 1 ? (
-                    events[events.indexOf(item) + 1].type === 'travel' ? (
+                  {events.indexOf(item) < events.length - 1 &&
+                  events[events.indexOf(item) + 1].type === 'travel' ? (
+                    editMode ? (
+                      <Menu renderer={renderers.ContextMenu}>
+                        <MenuTrigger>
+                          <Text style={styles.travel}>
+                            <MaterialCommunityIcons name="car" size={16} color="#5c5c5c" />
+                            {events[events.indexOf(item) + 1].duration}
+                          </Text>
+                        </MenuTrigger>
+                        <MenuOptions customStyles={MenuStyle}>
+                          <MenuOption
+                            onSelect={() => {
+                              let newTrace = trace;
+                              newTrace.eventID = parseFloat(item.startTime.replace(':', '')) + 0.1;
+                              console.log(newTrace);
+                              removeItem('event', trace, events[events.indexOf(item) + 1], () => {
+                                updateData();
+                                setRefresh((refresh) => refresh + 1);
+                              });
+                            }}
+                            text="Remove Travel Time"
+                          />
+                        </MenuOptions>
+                      </Menu>
+                    ) : (
                       <Text style={styles.travel}>
                         <MaterialCommunityIcons name="car" size={16} color="#5c5c5c" />
                         {events[events.indexOf(item) + 1].duration}
                       </Text>
-                    ) : (
-                      <View style={{ height: 16 }}></View>
                     )
                   ) : (
                     <View style={{ height: 16 }}></View>
@@ -386,7 +413,7 @@ const MenuStyle = {
     paddingHorizontal: 5,
     paddingVertical: 2,
     marginTop: 25,
-    width: 100,
+    width: 150,
     borderRadius: 5,
   },
 

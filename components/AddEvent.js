@@ -40,7 +40,7 @@ export default function AddEvent({ navigation, route }) {
     const date = new Date(selectedDate);
     console.log(selectedDate);
 
-    setStartTime(`${date.getHours()}:${date.getMinutes()}`);
+    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
     setShowStartTimePicker(false);
   };
 
