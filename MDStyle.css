@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Poppins&display=swap');
+
+* {
+  letter-spacing: 0.15rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+*::selection {
+  background-color: rgba(255, 166, 0, 0.273);
+}
+body {
+  padding: 5rem;
+  width: fit-content;
+  margin: auto;
+}
+ol,
+ul {
+  padding: 1rem;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+  border-radius: 1rem;
+}
+
+li input.task-list-item-checkbox {
+  filter: invert(1);
+}
+
+li input.task-list-item-checkbox:checked {
+  filter: sepia(100%) saturate(300%) contrast(100%) hue-rotate(-50deg) brightness(1) saturate(300%);
+}
+
+a,
+a:hover {
+  color: orange;
+  font-weight: 900;
+}

@@ -40,7 +40,7 @@ export default function Day({ route, navigation }) {
     getData().then((response) => {
       setDayData(response[trace.tripID - 1].days[trace.dayID - 1]);
       setTripName(response[trace.tripID - 1].name);
-
+      console.log(response[trace.tripID - 1].days[trace.dayID - 1].events);
       /**
        * Slightly messy way of doing this, but it works.
        * Set the events to the sorted by startTime list of events.
@@ -76,10 +76,6 @@ export default function Day({ route, navigation }) {
       clearInterval(interval);
     };
   }, [15000]);
-
-  useEffect(() => {
-    updateData();
-  }, []);
 
   /**
    * "navigateTo" is a function that takes two parameters, "location" and "eventData", and then
@@ -156,7 +152,8 @@ export default function Day({ route, navigation }) {
         contentContainerStyle={{ paddingBottom: 300, paddingTop: 10 }}
         renderItem={({ item }) =>
           /* A custom component that is used to animate the events. */
-          item.type == 'event' && (
+          item.type != 'travel' &&
+          item.name != '' && (
             <SlideInView offset={events.indexOf(item)}>
               {/* EVENT */}
 
@@ -172,13 +169,16 @@ export default function Day({ route, navigation }) {
                       <Text style={styles.dayText}>{item.name}</Text>
                       {/*  The departure time of the event. */}
                       <Text style={styles.departure}>
-                        <MaterialCommunityIcons name="clock" size={12} color="#5c5c5c" />
-                        {item.departure}
+                        {item.departure != '' && (
+                          <MaterialCommunityIcons name="clock" size={12} color="#5c5c5c" />
+                        )}
+                        {item.departure != '' && get12HourTime(item.departure)}
                       </Text>
                     </View>
                   </TouchableOpacity>
                   {events.indexOf(item) < events.length - 1 &&
-                  events[events.indexOf(item) + 1].type === 'travel' ? (
+                  (events[events.indexOf(item) + 1].type === 'travel' ||
+                    events[events.indexOf(item) + 1].type === 'drive') ? (
                     editMode ? (
                       <Menu renderer={renderers.ContextMenu}>
                         <MenuTrigger>
@@ -269,7 +269,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
-    marginTop: 35,
   },
   locationAndTravel: {
     flex: 1,

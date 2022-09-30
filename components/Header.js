@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { editItem } from './dataHandler';
+import { StatusBar } from 'expo-status-bar';
 export default function Header({
   children,
   title,
@@ -13,6 +14,7 @@ export default function Header({
 }) {
   return (
     <View style={styles.header}>
+      <StatusBar style="dark" />
       {back ? (
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack(null)}>
           <Feather name="chevron-left" size={30} style={styles.delete} />
@@ -66,7 +68,6 @@ const styles = StyleSheet.create({
     borderColor: '#f5f5f5ff',
     borderBottomWidth: 2,
     paddingBottom: 10,
-    marginTop: 10,
   },
   right: {
     marginLeft: 'auto',
@@ -95,14 +96,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'solid',
     borderRadius: 10,
+    textAlign: 'left',
     paddingVertical: 2,
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     lineHeight: 35,
     color: '#5c5c5c',
+    textAlign: 'left',
   },
 
   backText: {

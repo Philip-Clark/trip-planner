@@ -149,8 +149,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: 20,
-    paddingTop: 50,
+    borderColor: '#67dfe8',
+    borderWidth: 5,
+    padding: 15,
   },
 
   modalContent: {

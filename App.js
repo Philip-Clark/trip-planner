@@ -90,7 +90,7 @@ export default function App() {
   const Stack = createStackNavigator();
 
   return (
-    <MenuProvider>
+    <MenuProvider style={{ paddingTop: 40, backgroundColor: 'white' }}>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen

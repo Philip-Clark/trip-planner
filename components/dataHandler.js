@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
-export default function addItem(itemType, value, trace, callback) {
-  getData().then((response) => {
+export default async function addItem(itemType, value, trace, callback) {
+  await getData().then(async (response) => {
     if (response == null) {
       response = [];
     }
@@ -15,7 +15,7 @@ export default function addItem(itemType, value, trace, callback) {
         addDay(trace, response, callback);
         break;
       case 'event':
-        addEvent(value, trace, response, callback);
+        await addEvent(value, trace, response, callback);
         break;
 
       default:
@@ -46,8 +46,8 @@ export function removeItem(itemType, trace, item, callback) {
   });
 }
 
-export function editItem(itemType, trace, newData, callback) {
-  getData().then((response) => {
+export async function editItem(itemType, trace, newData, callback) {
+  getData().then(async (response) => {
     switch (itemType) {
       case 'trip':
         editTrip(trace, response, newData, callback);
@@ -57,7 +57,7 @@ export function editItem(itemType, trace, newData, callback) {
         editDay(trace, response, newData, callback);
         break;
       case 'event':
-        editEvent(trace, response, newData, callback);
+        await editEvent(trace, response, newData, callback);
         break;
 
       default:
@@ -72,14 +72,13 @@ export function editItem(itemType, trace, newData, callback) {
  * @param {{title: string, description: string, time: string,}} value
  * @param {String} trace
  */
-function addEvent(value, trace, data, callback) {
+async function addEvent(value, trace, data, callback) {
   const tripID = parseInt(trace.tripID) - 1;
   const dayID = parseInt(trace.dayID) - 1;
-  let eventId = parseFloat(value.startTime.replace(':', ''));
-
   let eventArray = data[tripID].days[dayID].events;
+  let eventId = Date.now();
 
-  eventArray.push({
+  let event = {
     id: eventId,
     name: value.title,
     data: value.description,
@@ -87,13 +86,13 @@ function addEvent(value, trace, data, callback) {
     startTime: value.startTime,
     type: value.type,
     duration: value.duration != null ? value.duration : 0,
-  });
-  storeData(data, callback);
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
+    trace: `${tripID} -  ${dayID}`,
+  };
+  eventArray.push(event);
+  await storeData(data, callback, event);
 }
-
+// addItem(itemType, value, trace, callback)
+// addDay(trace, response, callback);
 function addDay(trace, data, callback) {
   const tripID = parseInt(trace.tripID) - 1;
   const dayID = parseInt(data[tripID].days.length + 1);
@@ -105,14 +104,21 @@ function addDay(trace, data, callback) {
     events: [],
   });
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
 function addTrip(value, data, callback) {
   const tripID = parseInt(data.length + 1);
+
+  let startDate = value.startDate.split('/');
+  let endDate = value.endDate.split('/');
+
+  if (value.imported == true) {
+    value.startDate = `${startDate[2]}/${startDate[0]}/${startDate[1]}`;
+    value.endDate = `${endDate[2]}/${endDate[0]}/${endDate[1]}`;
+    value.name = value.name.split('.')[0];
+    console.log(startDate);
+  }
 
   data.push({
     id: tripID,
@@ -122,8 +128,8 @@ function addTrip(value, data, callback) {
     days: [],
   });
 
-  const startDate = value.startDate.split('/');
-  const endDate = value.endDate.split('/');
+  startDate = value.startDate.split('/');
+  endDate = value.endDate.split('/');
 
   const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
   const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
@@ -136,9 +142,6 @@ function addTrip(value, data, callback) {
     addDay({ tripID: tripID }, data, () => {});
   }
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
@@ -162,9 +165,6 @@ function removeEvent(trace, data, item, callback) {
     1
   );
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
@@ -175,26 +175,20 @@ function removeDay(trace, data, item, callback) {
 
   dayArray.splice(trace.dayID - 1, 1);
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
 function removeTrip(trace, data, item, callback) {
   data.splice(trace.tripID - 1, 1);
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
-export async function storeData(value, callback) {
+export async function storeData(value, callback, event) {
   try {
     const jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem('dataKey', jsonValue).then(() => {
-      callback();
+      callback(value, event);
     });
   } catch (e) {
     // saving error
@@ -202,7 +196,7 @@ export async function storeData(value, callback) {
   }
 }
 //  editEvent(trace, response, item, callback);
-function editEvent(trace, response, newData, callback) {
+async function editEvent(trace, response, newData, callback) {
   const tripID = parseInt(trace.tripID) - 1;
   const dayID = parseInt(trace.dayID) - 1;
 
@@ -215,7 +209,7 @@ function editEvent(trace, response, newData, callback) {
     eventArray[
       eventArray.indexOf(
         eventArray.find((obj) => {
-          return obj.id === trace.eventID;
+          return obj.id == trace.eventID;
         })
       )
     ];
@@ -223,17 +217,14 @@ function editEvent(trace, response, newData, callback) {
   item.name = newData.name;
   item.data = newData.data;
   item.departure = newData.departure;
-  item.time = newData.startTime;
+  item.startTime = newData.startTime;
   // data: value.description,
   // departure: value.time,
   // startTime: value.startTime,
   // type: value.type,
   // duration: value.duration != null ? value.duration : 0,
 
-  storeData(response, callback);
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
+  await storeData(response, callback);
 }
 
 function editDay(trace, data, callback) {
@@ -247,9 +238,6 @@ function editDay(trace, data, callback) {
     events: [],
   });
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 
@@ -278,9 +266,6 @@ function editTrip(value, data, callback) {
     addDay({ tripID: tripID }, data, () => {});
   }
 
-  console.log('================= STORING DATA ======================');
-  console.log(data);
-  console.log('=====================================================');
   storeData(data, callback);
 }
 

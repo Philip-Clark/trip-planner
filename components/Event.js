@@ -1,11 +1,96 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image,
+  ScrollView,
+} from 'react-native';
 import { editItem, removeItem } from './dataHandler';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from './Header';
+import { useState } from 'react';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from 'expo-linear-gradient';
+import RichTextEditor from './RichTextEditor';
+import RenderHtml from 'react-native-render-html';
 
 /**
  * Displays the details of the event.
  */
 export default function Event({ route, navigation }) {
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showDeparturePicker, setShowDeparturePicker] = useState(false);
+  const [departure, setDeparture] = useState(route.params.data.departure);
+  const [startTime, setStartTime] = useState(route.params.data.startTime);
+
+  /**
+   * When the user selects a departure, hide the departure picker and set the departure to the selected
+   * time.
+   * @param selectedTime - The time that was selected by the user.
+   */
+  const onDepartureTimeChange = (event, selectedDate) => {
+    const date = new Date(selectedDate);
+    console.log(selectedDate);
+
+    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
+    setShowDeparturePicker(false);
+
+    let dat = route.params.data;
+    dat.departure = `${date.getHours()}:${date.getMinutes()}`;
+    editItem('event', route.params.trace, dat, () => {});
+  };
+
+  /**
+   * Takes a selectedDate as an argument; sets the
+   * startTime state to the selectedDate's hours and minutes, and then sets the showStartTimePicker state
+   * to false.
+   * @param selectedDate - The date that was selected by the user.
+   */
+  const onStartTimeChange = async (event, selectedDate) => {
+    const date = new Date(selectedDate);
+    console.log(selectedDate);
+
+    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
+    setShowStartTimePicker(false);
+
+    let dat = route.params.data;
+    dat.startTime = `${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`;
+    dat.id = `${date.getHours()}${date.getMinutes().toString().padEnd(2, '0')}`;
+
+    await editItem('event', route.params.trace, dat, () => {});
+
+    console.log(dat.startTime);
+  };
+
+  /**
+   * If the hour is less than 12 and greater than 0, it's AM. If the hour is 0, it's 12 AM. If the hour
+   * is greater than 12, it's PM. If the hour is 12, it's 12 PM.
+   * @param time - The time in 24 hour format.
+   * @returns A string with the hour, minutes, and AM/PM.
+   */
+  const get12HourTime = (time) => {
+    let hour = time.split(':')[0];
+    let am = 'AM';
+    if (hour < 12 && hour > 0) {
+      am = 'AM';
+    } else {
+      if (hour == 0) {
+        hour = 12;
+      } else {
+        hour = hour - 12;
+        if (hour == 0) {
+          hour = 12;
+        }
+        am = 'PM';
+      }
+    }
+    /* Returning a string with the hour, minutes, and AM/PM. */
+    return `${hour}:${time.split(':')[1]} ${am}`;
+  };
+
   /**
    * When the delete button is pressed, the event is removed from the database and the user is returned
    * to the previous screen.
@@ -24,58 +109,67 @@ export default function Event({ route, navigation }) {
       />
       {route.params.editMode ? (
         <View>
-          {/* <View style={{ alignSelf: 'flex-start' }}>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-
-                justifyContent: 'space-between',
+          <View style={styles.timeRow}>
+            {/* A button that sets the showStartTimePicker state to true when pressed. */}
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => {
+                setShowStartTimePicker(true);
               }}
             >
-              <Text style={{ textAlign: 'right' }}>Arrival</Text>
-              <TextInput
-                style={[
-                  styles.text,
-                  styles.editable,
-                  { alignSelf: 'flex-start', marginLeft: 10, width: 60 },
-                ]}
-                multiline={true}
-                defaultValue={route.params.data.startTime}
-                onChangeText={(Text) => {
-                  let dat = route.params.data;
-                  dat.data = Text;
-                  editItem('event', route.params.trace, dat, () => {});
-                }}
+              {/* <MaterialCommunityIcons
+                name="clock"
+                size={32}
+                color="#5c5c5c"
+                style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
+              /> */}
+              <Text style={styles.dateInputText}>
+                Arrival : {startTime != '' ? get12HourTime(startTime) : ' Start Time'}
+              </Text>
+            </TouchableOpacity>
+            {/* A conditional statement that renders the DateTimePicker component if the
+      showStartTimePicker state is true. */}
+            {showStartTimePicker && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={new Date('2000', '0', '01', '12', '00', '00', '00')}
+                mode={'time'}
+                is24Hour={false}
+                onChange={onStartTimeChange}
               />
-            </View>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ textAlign: 'right' }}>Departure</Text>
-              <TextInput
-                style={[
-                  styles.text,
-                  styles.editable,
-                  { alignSelf: 'flex-start', marginLeft: 10, width: 60 },
-                ]}
-                multiline={true}
-                defaultValue={route.params.data.departure}
-                onChangeText={(Text) => {
-                  let dat = route.params.data;
-                  dat.data = Text;
-                  editItem('event', route.params.trace, dat, () => {});
-                }}
+            )}
+            {/* This is a button that sets the showPicker state to true when pressed. */}
+            <TouchableOpacity style={styles.dateInput} onPress={() => setShowDeparturePicker(true)}>
+              {/* <MaterialCommunityIcons
+                name="clock"
+                size={32}
+                color="#5c5c5c"
+                style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
+              /> */}
+              <Text style={styles.dateInputText}>
+                Departure : {departure != '' ? get12HourTime(departure) : ' Departure Time'}{' '}
+              </Text>
+            </TouchableOpacity>
+            {/* A modal that is used to display the time picker for the event departure. */}
+            {showDeparturePicker && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={new Date('2000', '0', '01', '12', '00', '00', '00')}
+                mode={'time'}
+                is24Hour={false}
+                onChange={onDepartureTimeChange}
               />
-            </View>
-          </View> */}
-
-          <TextInput
+            )}
+          </View>
+          <RichTextEditor
+            defaultValue={route.params.data.data}
+            callback={(response) => {
+              let dat = route.params.data;
+              dat.data = response;
+              editItem('event', route.params.trace, dat, () => {});
+            }}
+          />
+          {/* <TextInput
             style={[styles.text, styles.editable]}
             multiline={true}
             defaultValue={route.params.data.data}
@@ -84,10 +178,42 @@ export default function Event({ route, navigation }) {
               dat.data = Text;
               editItem('event', route.params.trace, dat, () => {});
             }}
-          />
+          /> */}
         </View>
       ) : (
-        <Text style={styles.text}>{route.params.data.data}</Text>
+        <View>
+          <View style={styles.timeRow}>
+            <View style={styles.dateInput}>
+              {/* <MaterialCommunityIcons
+                name="clock"
+                size={32}
+                color="#67dfe8"
+                style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
+              /> */}
+              <Text style={styles.dateInputText}>
+                Arrival: {startTime != '' ? get12HourTime(startTime) : ' Start Time'}
+              </Text>
+            </View>
+            {departure != '' && (
+              <View style={styles.dateInput}>
+                {/* <MaterialCommunityIcons
+                  name="clock"
+                  size={32}
+                  color="#5c5c5c"
+                  style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
+                /> */}
+                <Text style={styles.dateInputText}>Departure: {get12HourTime(departure)}</Text>
+              </View>
+            )}
+          </View>
+          <ScrollView>
+            <View style={{ marginBottom: 300 }}>
+              <RenderHtml source={{ html: route.params.data.data }} style={styles.text} />
+            </View>
+          </ScrollView>
+          {/* Fade out list view */}
+          <LinearGradient colors={['rgba(255, 255, 255, 0)', '#ffffff']} style={styles.gradient} />
+        </View>
       )}
     </View>
   );
@@ -95,11 +221,9 @@ export default function Event({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     height: '100%',
     backgroundColor: 'white',
     padding: 20,
-    marginTop: 35,
   },
 
   editModeContainer: {
@@ -108,11 +232,43 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   text: {
+    padding: 30,
+    fontSize: 20,
+    color: '#5c5c5c',
+  },
+
+  dateInput: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignContent: 'center',
+  },
+
+  color: '#828282',
+  timeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5ff',
+  },
+
+  dateInputText: {
     fontSize: 16,
-    color: '#828282',
+    padding: 8,
+  },
+
+  gradient: {
+    position: 'absolute',
+    marginBottom: 0,
+    bottom: 80,
+    height: 1,
+    width: '100%',
+    transform: [{ scaleY: 100 }, { translateY: -0.5 }],
   },
 
   editable: {
+    height: 500,
     borderColor: '#969696',
     borderWidth: 1,
     borderStyle: 'solid',
