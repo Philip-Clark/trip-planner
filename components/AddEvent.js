@@ -3,6 +3,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import DatePicker from 'react-native-modern-datepicker';
 import React, { useState } from 'react';
 import addItem from './dataHandler';
+import RichTextEditor from './RichTextEditor';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
@@ -104,13 +105,10 @@ export default function AddEvent({ navigation, route }) {
         onChangeText={(input) => setTitle(input)}
       />
       {/* This is a TextInput component that is used to get the description of the event. */}
-      <TextInput
-        style={styles.textInput}
+      <RichTextEditor
         placeholder={'Description'}
-        multiline={true}
-        onChangeText={(input) => {
-          setDescription(input);
-          console.log(input);
+        callback={(response) => {
+          setDescription(response);
         }}
       />
 

@@ -3,8 +3,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import { View, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { actions, RichEditor, RichToolbar } from 'react-native-pell-rich-editor';
+import { Feather, Ionicons, SimpleLineIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native-gesture-handler';
+import { KeyboardAvoidingView } from 'react-native';
 
-export default function RichTextEditor({ callback, defaultValue }) {
+export default function RichTextEditor({ callback, defaultValue, placeholder }) {
   const richText = useRef();
 
   const pickImage = async () => {
@@ -24,17 +27,20 @@ export default function RichTextEditor({ callback, defaultValue }) {
   };
 
   return (
-    <View>
-      <RichEditor
-        ref={richText} // from useRef()
-        onChange={(text) => {
-          callback(text);
-        }}
-        initialContentHTML={defaultValue}
-        androidHardwareAccelerationDisabled={true}
-        // style={styles.richTextEditorStyle}
-        initialHeight={250}
-      />
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
+      <ScrollView style={{ height: '80%' }}>
+        <RichEditor
+          ref={richText} // from useRef()
+          onChange={(text) => {
+            callback(text);
+          }}
+          initialContentHTML={defaultValue}
+          placeholder={placeholder}
+          androidHardwareAccelerationDisabled={true}
+          // style={styles.richTextEditorStyle}
+          initialHeight={300}
+        />
+      </ScrollView>
 
       <RichToolbar
         editor={richText}
@@ -45,17 +51,21 @@ export default function RichTextEditor({ callback, defaultValue }) {
           actions.setItalic,
           actions.insertBulletsList,
           actions.insertOrderedList,
-          'addImage',
           actions.insertLink,
           actions.setStrikethrough,
           actions.setUnderline,
+          'addImage',
+          actions.size,
         ]}
-        iconMap={{ addImage: <Text>I</Text> }}
+        iconMap={{
+          addImage: ({ tintColor }) => (
+            <Ionicons name="image" size={24} color="black" style={[{ color: tintColor }]} />
+          ),
+        }}
         addImage={() => {
           pickImage();
         }}
-        // style={styles.richTextToolbarStyle}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
