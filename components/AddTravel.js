@@ -97,6 +97,8 @@ export default function AddTravel({ navigation, route }) {
   return (
     <View style={styles.container}>
       <SelectDropdown
+        buttonStyle={{ width: '100%' }}
+        defaultButtonText={'Select event'}
         data={events}
         onSelect={(selectedItem, index) => {
           console.log(selectedItem);
@@ -139,7 +141,7 @@ export default function AddTravel({ navigation, route }) {
 
       {/* A button that calls the done function when pressed. */}
       <TouchableOpacity style={styles.done} onPress={saveAndExit}>
-        <Text style={styles.doneText}>Done</Text>
+        <Text style={styles.doneText}>Save Travel Time</Text>
       </TouchableOpacity>
     </View>
   );
@@ -224,7 +226,7 @@ const MenuStyle = {
     paddingHorizontal: 5,
     paddingVertical: 2,
     marginTop: 25,
-    width: 100,
+    width: '100%',
     borderRadius: 5,
   },
 

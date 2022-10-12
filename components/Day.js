@@ -156,7 +156,6 @@ export default function Day({ route, navigation }) {
           item.name != '' && (
             <SlideInView offset={events.indexOf(item)}>
               {/* EVENT */}
-
               <EventTimeLine item={item} eventUnsorted={events} date={route.params.date}>
                 {/* EVENT CARD */}
                 <View style={styles.locationAndTravel}>
@@ -275,6 +274,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 8 }],
     alignContent: 'flex-start',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
 
   editModeContainer: {

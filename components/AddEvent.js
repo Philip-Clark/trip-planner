@@ -24,11 +24,10 @@ export default function AddEvent({ navigation, route }) {
    * @param selectedTime - The time that was selected by the user.
    */
   const onDepartureTimeChange = (event, selectedDate) => {
+    setShowDeparturePicker(false);
     const date = new Date(selectedDate);
     console.log(selectedDate);
-
     setDeparture(`${date.getHours()}:${date.getMinutes()}`);
-    setShowDeparturePicker(false);
   };
 
   /**
@@ -38,11 +37,10 @@ export default function AddEvent({ navigation, route }) {
    * @param selectedDate - The date that was selected by the user.
    */
   const onStartTimeChange = (event, selectedDate) => {
+    setShowStartTimePicker(false);
     const date = new Date(selectedDate);
     console.log(selectedDate);
-
     setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
-    setShowStartTimePicker(false);
   };
 
   /**
@@ -78,7 +76,7 @@ export default function AddEvent({ navigation, route }) {
    * If any of the fields are empty, then alert the user to fill out all fields.
    */
   const saveAndExit = () => {
-    if (title !== '' && description !== '' && departure !== '') {
+    if (title !== '' && description !== '') {
       addItem(
         'event',
         {
@@ -104,19 +102,14 @@ export default function AddEvent({ navigation, route }) {
         placeholder={'Title'}
         onChangeText={(input) => setTitle(input)}
       />
-      {/* This is a TextInput component that is used to get the description of the event. */}
-      <RichTextEditor
-        placeholder={'Description'}
-        callback={(response) => {
-          setDescription(response);
-        }}
-      />
 
       {/* A button that sets the showStartTimePicker state to true when pressed. */}
       <TouchableOpacity
         style={styles.dateInput}
         onPress={() => {
-          setShowStartTimePicker(true);
+          if (showStartTimePicker == false) {
+            setShowStartTimePicker(true);
+          }
         }}
       >
         <Text style={styles.dateInputText}>
@@ -152,9 +145,16 @@ export default function AddEvent({ navigation, route }) {
           onChange={onDepartureTimeChange}
         />
       )}
+      {/* This is a TextInput component that is used to get the description of the event. */}
+      <RichTextEditor
+        placeholder={'Description'}
+        callback={(response) => {
+          setDescription(response);
+        }}
+      />
       {/* A button that calls the done function when pressed. */}
       <TouchableOpacity style={styles.done} onPress={saveAndExit}>
-        <Text style={styles.doneText}>Done</Text>
+        <Text style={styles.doneText}>Save Event</Text>
       </TouchableOpacity>
     </View>
   );

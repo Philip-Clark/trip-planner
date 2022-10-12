@@ -16,6 +16,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import RichTextEditor from './RichTextEditor';
 import RenderHtml from 'react-native-render-html';
+import { AnchorRenderer, customHTMLElementModels } from './customLinkRenderer';
 
 /**
  * Displays the details of the event.
@@ -33,11 +34,9 @@ export default function Event({ route, navigation }) {
    */
   const onDepartureTimeChange = (event, selectedDate) => {
     const date = new Date(selectedDate);
-    console.log(selectedDate);
-
-    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
     setShowDeparturePicker(false);
-
+    console.log(selectedDate);
+    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
     let dat = route.params.data;
     dat.departure = `${date.getHours()}:${date.getMinutes()}`;
     editItem('event', route.params.trace, dat, () => {});
@@ -50,19 +49,13 @@ export default function Event({ route, navigation }) {
    * @param selectedDate - The date that was selected by the user.
    */
   const onStartTimeChange = async (event, selectedDate) => {
-    const date = new Date(selectedDate);
-    console.log(selectedDate);
-
-    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
     setShowStartTimePicker(false);
-
+    const date = new Date(selectedDate);
+    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
     let dat = route.params.data;
     dat.startTime = `${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`;
     dat.id = `${date.getHours()}${date.getMinutes().toString().padEnd(2, '0')}`;
-
     await editItem('event', route.params.trace, dat, () => {});
-
-    console.log(dat.startTime);
   };
 
   /**
@@ -114,7 +107,9 @@ export default function Event({ route, navigation }) {
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => {
-                setShowStartTimePicker(true);
+                if (showStartTimePicker == false) {
+                  setShowStartTimePicker(true);
+                }
               }}
             >
               {/* <MaterialCommunityIcons
@@ -131,26 +126,19 @@ export default function Event({ route, navigation }) {
       showStartTimePicker state is true. */}
             {showStartTimePicker && (
               <DateTimePicker
-                testID="dateTimePicker"
                 value={new Date('2000', '0', '01', '12', '00', '00', '00')}
                 mode={'time'}
                 is24Hour={false}
                 onChange={onStartTimeChange}
               />
             )}
+
             {/* This is a button that sets the showPicker state to true when pressed. */}
             <TouchableOpacity style={styles.dateInput} onPress={() => setShowDeparturePicker(true)}>
-              {/* <MaterialCommunityIcons
-                name="clock"
-                size={32}
-                color="#5c5c5c"
-                style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
-              /> */}
               <Text style={styles.dateInputText}>
                 Departure : {departure != '' ? get12HourTime(departure) : ' Departure Time'}{' '}
               </Text>
             </TouchableOpacity>
-            {/* A modal that is used to display the time picker for the event departure. */}
             {showDeparturePicker && (
               <DateTimePicker
                 testID="dateTimePicker"
@@ -208,7 +196,12 @@ export default function Event({ route, navigation }) {
           </View>
           <ScrollView>
             <View style={{ marginBottom: 300 }}>
-              <RenderHtml source={{ html: route.params.data.data }} style={styles.text} />
+              <RenderHtml
+                source={{ html: route.params.data.data }}
+                style={styles.text}
+                renderers={AnchorRenderer}
+                customHTMLElementModels={customHTMLElementModels}
+              />
             </View>
           </ScrollView>
           {/* Fade out list view */}

@@ -88,7 +88,7 @@ export default function AddTrip({ navigation, route }) {
       </Modal>
 
       <TouchableOpacity style={styles.done} onPress={done}>
-        <Text style={styles.doneText}>Done</Text>
+        <Text style={styles.doneText}>Add Trip</Text>
       </TouchableOpacity>
     </View>
   );

@@ -27,6 +27,7 @@ FUNCTIONS:
 export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   const [newColorValue, setNewColorValue] = useState(0);
   const [animation] = useState(new Animated.Value(0));
+  const [layout, setLayout] = useState(0);
   const now = new Date();
   let currentTime = now.getTime();
   let events = eventUnsorted.filter((event) => event.type == 'event');
@@ -54,6 +55,14 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
     const minimumDiff = 1;
     const difference = parseFloat(nextTime - thisTime) / 8000000;
     return difference > minimumDiff ? difference * 30 : 1;
+  };
+
+  const getHalfHeight = () => {
+    return layout;
+  };
+
+  const measureView = (event) => {
+    setLayout(event.nativeEvent.layout.height);
   };
 
   /** 
@@ -133,9 +142,14 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   
   */
   return (
-    <Animated.View style={[styles.day, { marginBottom: getTimeDifference() }]}>
+    <Animated.View
+      style={[styles.day, { marginBottom: getTimeDifference() }]}
+      onLayout={(event) => measureView(event)}
+    >
       {/* START TIME */}
-      <Text style={styles.timeText}>{get12HourTime()}</Text>
+      <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.timeText}>
+        {get12HourTime()}
+      </Text>
       {/* DOT */}
       <Animated.View
         style={[
@@ -154,7 +168,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
             <View
               style={[
                 styles.line,
-                { height: getLineSize() * (getTimeDifference() + 66) },
+                { height: getLineSize() * (getTimeDifference() + getHalfHeight()) },
                 { backgroundColor: '#7ff8f8' },
               ]}
             />
@@ -162,7 +176,10 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
             <View
               style={[
                 styles.line,
-                { height: (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + 66) },
+                {
+                  height:
+                    (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + getHalfHeight()),
+                },
                 { backgroundColor: '#f5f5f5ff' },
               ]}
             />
@@ -178,7 +195,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
  */
 const styles = StyleSheet.create({
   currentTimeLine: {
-    position: 'absolute',
+    // position: 'absolute',
     marginTop: 23,
     marginLeft: 75,
     transform: [
@@ -195,7 +212,7 @@ const styles = StyleSheet.create({
 
   timeText: {
     fontSize: 16,
-    width: 60,
+    width: 70,
     color: '#5c5c5c',
     alignSelf: 'center',
   },
@@ -211,7 +228,8 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
     margin: 10,
-    alignSelf: 'center',
+    marginTop: 13,
+    alignSelf: 'flex-start',
     borderRadius: 50000,
   },
 

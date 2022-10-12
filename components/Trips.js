@@ -166,7 +166,7 @@ export default function Trips({ navigation }) {
                 parsInputFile();
               }}
             >
-              <Text style={styles.doneText}>Done</Text>
+              <Text style={styles.doneText}>Import CSV</Text>
             </TouchableOpacity>
           </View>
         </View>
