@@ -7,6 +7,8 @@ import { renderers } from 'react-native-popup-menu';
 import addItem, { getData, storeData } from './dataHandler';
 import SelectDropdown from 'react-native-select-dropdown';
 import { useFocusEffect } from '@react-navigation/native';
+import OpacityButton from './OpacityButton';
+import { theme } from './Styles';
 
 /**
  * This view is used to add an event to the database
@@ -140,9 +142,11 @@ export default function AddTravel({ navigation, route }) {
       </Modal>
 
       {/* A button that calls the done function when pressed. */}
-      <TouchableOpacity style={styles.done} onPress={saveAndExit}>
-        <Text style={styles.doneText}>Save Travel Time</Text>
-      </TouchableOpacity>
+      <OpacityButton
+        onPress={saveAndExit}
+        text={'Save Travel Time'}
+        buttonStyle={theme.style.bottomButton}
+      />
     </View>
   );
 }
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    borderColor: '#67dfe8',
+    borderColor: theme.colors.accent,
     borderWidth: 5,
     padding: 15,
   },
@@ -166,33 +170,33 @@ const styles = StyleSheet.create({
   },
 
   timePicker: {
-    borderRadius: 30,
+    borderRadius: theme.sizes.borderRadius,
     shadowColor: '#000000',
     elevation: 100,
   },
 
   textInput: {
     fontSize: 16,
-    color: '#5c5c5c',
-    backgroundColor: '#f5f5f5ff',
+    color: theme.colors.text,
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 10,
     maxHeight: 200,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
 
   dateInput: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
 
@@ -201,16 +205,16 @@ const styles = StyleSheet.create({
     bottom: 30,
     width: '100%',
     marginHorizontal: 20,
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
 
   dateInputText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     marginVertical: 5,
   },
 
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     alignSelf: 'center',
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 });
 const MenuStyle = {
@@ -227,7 +231,7 @@ const MenuStyle = {
     paddingVertical: 2,
     marginTop: 25,
     width: '100%',
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
   },
 
   optionsWrapper: {},
@@ -239,6 +243,6 @@ const MenuStyle = {
   },
   optionText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 };

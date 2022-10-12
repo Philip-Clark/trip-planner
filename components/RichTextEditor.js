@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { getLinkPreview, getPreviewFromContent } from 'link-preview-js';
 import RenderHTML from 'react-native-render-html';
+import { theme } from './Styles';
+import OpacityButton from './OpacityButton';
 
 export default function RichTextEditor({ callback, defaultValue, placeholder }) {
   const [linkModalVisible, setLinkModalVisible] = useState(false);
@@ -89,8 +91,6 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
     });
   };
 
-  const handleLink = () => {};
-
   return (
     <View style={{ display: 'flex', flexDirection: 'column-reverse' }}>
       <ScrollView>
@@ -110,9 +110,10 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
       </ScrollView>
 
       <RichToolbar
+        style={styles.toolbar}
         editor={richText}
-        selectedIconTint="#873c1e"
-        iconTint="#312921"
+        selectedIconTint={theme.colors.accent}
+        iconTint={theme.colors.text}
         actions={[
           actions.setBold,
           actions.setItalic,
@@ -149,8 +150,6 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
         }}
       />
 
-      {/*  */}
-
       <Modal
         animationType="fade"
         transparent={true}
@@ -173,17 +172,16 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
             </View>
             <RenderHTML source={{ html: linkData }} style={{ height: 30 }} />
 
-            <TouchableOpacity
-              style={styles.done}
+            <OpacityButton
+              text={'Insert Link'}
               onPress={() => {
                 richText.current?.insertHTML(`<a href='${linkRaw.url}'>${linkRaw.title}</a>`);
                 setLinkData('');
                 setLinkRaw('');
                 setLinkModalVisible(false);
               }}
-            >
-              <Text style={{ textAlign: 'center' }}>Insert Link</Text>
-            </TouchableOpacity>
+              textStyle={{ textAlign: 'center', fontWeight: 'normal', flex: 1 }}
+            />
           </View>
         </View>
       </Modal>
@@ -205,31 +203,28 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
                   margin: 5,
                   marginBottom: 25,
                   padding: 15,
-                  borderWidth: 1,
-                  borderColor: '#000',
+                  borderRadius: theme.sizes.borderRadius,
+                  backgroundColor: theme.colors.itemColor,
                 }}
               >
                 <TextInput
-                  // style={{ height: 300 }}
                   multiline={true}
-                  placeholder="<div>\n<h1>Hello</h1>\n</div>"
+                  placeholder="<h1 style='textAlign: center'> Hello </h1>"
                   onChangeText={(text) => {
                     setCode(text);
                   }}
                 />
               </KeyboardAwareScrollView>
             </View>
-
-            <TouchableOpacity
-              style={styles.done}
+            <OpacityButton
               onPress={() => {
                 richText.current?.insertHTML(code + '<br><br>');
                 setCode('');
                 setCodeModalVisible(false);
               }}
-            >
-              <Text style={{ textAlign: 'center', marginBottom: 10 }}>Insert HTML</Text>
-            </TouchableOpacity>
+              text={'Insert HTML'}
+              textStyle={{ textAlign: 'center', fontWeight: 'normal', flex: 1 }}
+            />
           </View>
         </View>
       </Modal>
@@ -240,10 +235,15 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
 const styles = StyleSheet.create({
   modalDimmer: {
     flex: 1,
-    backgroundColor: '#00000098',
+    backgroundColor: theme.colors.modalBackground,
+  },
+  toolbar: {
+    backgroundColor: theme.colors.itemColor,
+    color: theme.colors.itemColor,
+    borderRadius: theme.sizes.borderRadius,
   },
   modal: {
-    borderRadius: 10,
+    borderRadius: theme.sizes.borderRadius,
     alignContent: 'space-between',
     flexDirection: 'column',
     backgroundColor: 'white',
@@ -261,17 +261,10 @@ const styles = StyleSheet.create({
   },
 
   link: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     padding: 5,
     paddingHorizontal: 10,
     marginVertical: 10,
-    borderRadius: 5,
-  },
-
-  done: {
-    backgroundColor: '#f5f5f5ff',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
   },
 });

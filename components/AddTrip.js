@@ -1,15 +1,21 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, Modal, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TextInput, Modal, View, Alert } from 'react-native';
 import DatePicker from 'react-native-modern-datepicker';
+import React, { useState } from 'react';
 import addItem from './dataHandler';
+import OpacityButton from './OpacityButton';
+import { theme } from './Styles';
 
+// NOTE Cleaned and added theme styles.
 export default function AddTrip({ navigation, route }) {
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [title, setTitle] = useState('');
+
+  const emptyField = startTime == '' || endTime == '' || title == '';
+  const startDateButtonText = startTime != '' ? startTime : 'Start';
+  const endDateButtonText = endTime != '' ? endTime : 'End';
 
   const selectStart = (selectedTime) => {
     setShowStartPicker(false);
@@ -22,43 +28,49 @@ export default function AddTrip({ navigation, route }) {
   };
 
   const done = () => {
-    if (startTime !== '' && endTime !== '' && title !== '') {
-      addItem(
-        'trip',
-        { name: title, startDate: startTime, endDate: endTime },
-        route.params.trace,
-        () => navigation.goBack(null)
-      );
+    if (emptyField) {
+      Alert.alert('Oops', '\nPlease fill out all fields');
     } else {
-      alert('Please fill out all fields');
+      const tripData = { name: title, startDate: startTime, endDate: endTime };
+      addItem('trip', tripData, route.params.trace, () => navigation.goBack(null));
     }
   };
 
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.textInput}
+        // Title Input
         placeholder={'Title'}
+        style={styles.textInput}
         onChangeText={(input) => setTitle(input)}
       />
 
-      <TouchableOpacity style={styles.dateInput} onPress={() => setShowStartPicker(true)}>
-        <Text style={styles.dateInputText}>{startTime != '' ? startTime : 'Start'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.dateInput} onPress={() => setShowEndPicker(true)}>
-        <Text style={styles.dateInputText}>{endTime != '' ? endTime : 'End'}</Text>
-      </TouchableOpacity>
+      <OpacityButton
+        // Start date selector button
+        onPress={() => setShowStartPicker(true)}
+        text={startDateButtonText}
+        textStyle={theme.style.leftButton}
+      ></OpacityButton>
+
+      <OpacityButton
+        // End date selector button
+        onPress={() => setShowEndPicker(true)}
+        text={endDateButtonText}
+        textStyle={theme.style.leftButton}
+      />
+
       <Modal
+        // Start date Selector modal
         animationType="fade"
-        transparent={false}
+        transparent={true}
         visible={showStartPicker}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible);
+          setShowStartPicker(!showStartPicker);
         }}
       >
         <View style={styles.modalContent}>
           <DatePicker
+            // Start date Selector
             style={styles.timePicker}
             mode="calendar"
             maximumDate={endTime}
@@ -68,16 +80,17 @@ export default function AddTrip({ navigation, route }) {
       </Modal>
 
       <Modal
+        // End date Selector modal
         animationType="fade"
-        transparent={false}
+        transparent={true}
         visible={showEndPicker}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible);
+          setShowEndPicker(!showEndPicker);
         }}
       >
         <View style={styles.modalContent}>
           <DatePicker
+            // End date Selector
             style={styles.timePicker}
             minimumDate={startTime}
             current={startTime}
@@ -87,9 +100,7 @@ export default function AddTrip({ navigation, route }) {
         </View>
       </Modal>
 
-      <TouchableOpacity style={styles.done} onPress={done}>
-        <Text style={styles.doneText}>Add Trip</Text>
-      </TouchableOpacity>
+      <OpacityButton text={'Add Trip'} onPress={done} buttonStyle={theme.style.bottomButton} />
     </View>
   );
 }
@@ -97,7 +108,7 @@ export default function AddTrip({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     padding: 20,
   },
 
@@ -105,21 +116,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     padding: 3,
-    alignContent: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    backgroundColor: theme.colors.modalBackground,
   },
 
   timePicker: {
     borderRadius: 30,
-    shadowColor: '#000000',
-    elevation: 100,
+    elevation: 10,
   },
 
   textInput: {
     fontSize: 16,
-    color: '#5c5c5c',
-    backgroundColor: '#f5f5f5ff',
+    color: theme.colors.text,
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -130,7 +140,7 @@ const styles = StyleSheet.create({
   },
 
   dateInput: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -145,7 +155,7 @@ const styles = StyleSheet.create({
     bottom: 30,
     width: '100%',
     marginHorizontal: 20,
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
 
   dateInputText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     marginVertical: 5,
   },
 
@@ -162,6 +172,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     alignSelf: 'center',
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 });
