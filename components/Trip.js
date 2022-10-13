@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import SlideInView from './slideView';
 import Header from './Header';
 import moment from 'moment';
+import { theme } from './Styles';
 
 /**
  * Renders a list of days
@@ -113,32 +114,32 @@ export default function Trip({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     padding: 20,
   },
   headerText: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#5c5c5c',
-    borderColor: '#f5f5f5ff',
+    color: theme.colors.text,
+    borderColor: theme.colors.itemColor,
     borderBottomWidth: 1,
     paddingBottom: 5,
     marginBottom: 5,
   },
 
   tripItem: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
   tripText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 
   add: {

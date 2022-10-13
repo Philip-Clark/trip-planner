@@ -17,6 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import RichTextEditor from './RichTextEditor';
 import RenderHtml from 'react-native-render-html';
 import { AnchorRenderer, customHTMLElementModels } from './customLinkRenderer';
+import { theme } from './Styles';
+import { get12HourTime } from './timeConvert';
 
 /**
  * Displays the details of the event.
@@ -64,25 +66,6 @@ export default function Event({ route, navigation }) {
    * @param time - The time in 24 hour format.
    * @returns A string with the hour, minutes, and AM/PM.
    */
-  const get12HourTime = (time) => {
-    let hour = time.split(':')[0];
-    let am = 'AM';
-    if (hour < 12 && hour > 0) {
-      am = 'AM';
-    } else {
-      if (hour == 0) {
-        hour = 12;
-      } else {
-        hour = hour - 12;
-        if (hour == 0) {
-          hour = 12;
-        }
-        am = 'PM';
-      }
-    }
-    /* Returning a string with the hour, minutes, and AM/PM. */
-    return `${hour}:${time.split(':')[1]} ${am}`;
-  };
 
   /**
    * When the delete button is pressed, the event is removed from the database and the user is returned
@@ -112,12 +95,6 @@ export default function Event({ route, navigation }) {
                 }
               }}
             >
-              {/* <MaterialCommunityIcons
-                name="clock"
-                size={32}
-                color="#5c5c5c"
-                style={{ transform: [{ rotate: `${Math.random() * 360}deg` }] }}
-              /> */}
               <Text style={styles.dateInputText}>
                 Arrival : {startTime != '' ? get12HourTime(startTime) : ' Start Time'}
               </Text>
@@ -205,7 +182,10 @@ export default function Event({ route, navigation }) {
             </View>
           </ScrollView>
           {/* Fade out list view */}
-          <LinearGradient colors={['rgba(255, 255, 255, 0)', '#ffffff']} style={styles.gradient} />
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0)', theme.colors.white]}
+            style={styles.gradient}
+          />
         </View>
       )}
     </View>
@@ -215,38 +195,40 @@ export default function Event({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     height: '100%',
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     padding: 20,
   },
 
   editModeContainer: {
-    borderColor: '#67dfe8',
-    borderWidth: 5,
+    borderColor: theme.colors.accent,
+    borderWidth: theme.sizes.borderWidth,
     padding: 15,
   },
   text: {
     padding: 30,
     fontSize: 20,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 
   dateInput: {
     display: 'flex',
     flexDirection: 'row',
     alignContent: 'center',
+    colors: theme.colors.text,
   },
 
-  color: '#828282',
   timeRow: {
+    color: theme.colors.text,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginVertical: 10,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5ff',
+    borderBottomColor: theme.colors.itemColor,
   },
 
   dateInputText: {
+    color: theme.colors.text,
     fontSize: 16,
     padding: 8,
   },
@@ -262,10 +244,10 @@ const styles = StyleSheet.create({
 
   editable: {
     height: 500,
-    borderColor: '#969696',
+    borderColor: theme.colors.itemColor,
     borderWidth: 1,
     borderStyle: 'solid',
-    borderRadius: 10,
+    borderRadius: theme.sizes.borderRadius,
     paddingVertical: 2,
     paddingHorizontal: 10,
   },

@@ -59,6 +59,7 @@ export default function AddEvent({ navigation, route }) {
     <View style={styles.container}>
       <TextInput
         placeholder={'Title'}
+        placeholderTextColor={theme.colors.text}
         style={styles.textInput}
         onChangeText={(input) => setTitle(input)}
       />

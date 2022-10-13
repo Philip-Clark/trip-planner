@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState } from 'react';
 
+//? ADD ITEM
 export default async function addItem(itemType, value, trace, callback) {
   await getData().then(async (response) => {
     if (response == null) {
       response = [];
     }
+    // perform proper functions based on item type
     switch (itemType) {
       case 'trip':
         addTrip(value, response, callback);
@@ -14,6 +15,7 @@ export default async function addItem(itemType, value, trace, callback) {
       case 'day':
         addDay(trace, response, callback);
         break;
+
       case 'event':
         await addEvent(value, trace, response, callback);
         break;
@@ -23,10 +25,72 @@ export default async function addItem(itemType, value, trace, callback) {
         break;
     }
   });
-}
+  async function addEvent(value, trace, data, callback) {
+    const tripID = parseInt(trace.tripID) - 1;
+    const dayID = parseInt(trace.dayID) - 1;
+    const eventArray = data[tripID].days[dayID].events;
+    const eventId = Date.now();
+    const event = {
+      id: eventId,
+      name: value.title,
+      data: value.description,
+      departure: value.time,
+      startTime: value.startTime,
+      type: value.type,
+      duration: value.duration != null ? value.duration : 0,
+      trace: `${tripID} -  ${dayID}`,
+    };
+    eventArray.push(event);
+    await storeData(data, callback, event);
+  }
 
+  function addDay(trace, data, callback) {
+    const tripID = parseInt(trace.tripID) - 1;
+    const dayID = parseInt(data[tripID].days.length + 1);
+    const dayArray = data[tripID].days;
+    dayArray.push({
+      id: dayID,
+      events: [],
+    });
+    storeData(data, callback);
+  }
+  function addTrip(value, data, callback) {
+    const tripID = parseInt(data.length + 1);
+    let startDate = value.startDate.split('/');
+    let endDate = value.endDate.split('/');
+    if (value.imported == true) {
+      value.startDate = `${startDate[2]}/${startDate[0]}/${startDate[1]}`;
+      value.endDate = `${endDate[2]}/${endDate[0]}/${endDate[1]}`;
+      value.name = value.name.split('.')[0];
+    }
+
+    data.push({
+      id: tripID,
+      name: value.name,
+      leaveDate: value.startDate,
+      returnDate: value.endDate,
+      days: [],
+    });
+
+    // Get the number of day the trip is scheduled to be
+    startDate = value.startDate.split('/');
+    endDate = value.endDate.split('/');
+    const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
+    const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
+    const differenceInMins = convertedEndDate.getTime() - convertedStartDate.getTime();
+    const differenceInDays = differenceInMins / (1000 * 3600 * 24);
+    // add a day for each day of the trip
+    for (let i = 0; i <= differenceInDays; i++) {
+      addDay({ tripID: tripID }, data, () => {});
+    }
+
+    storeData(data, callback);
+  }
+}
+//? REMOVE ITEM
 export function removeItem(itemType, trace, item, callback) {
   getData().then((response) => {
+    // perform proper functions based on item type
     switch (itemType) {
       case 'trip':
         removeTrip(trace, response, item, callback);
@@ -35,6 +99,7 @@ export function removeItem(itemType, trace, item, callback) {
       case 'day':
         removeDay(trace, response, item, callback);
         break;
+
       case 'event':
         removeEvent(trace, response, item, callback);
         break;
@@ -44,10 +109,38 @@ export function removeItem(itemType, trace, item, callback) {
         break;
     }
   });
-}
+  function removeEvent(trace, data, item, callback) {
+    const tripID = parseInt(trace.tripID) - 1;
+    const dayID = parseInt(trace.dayID) - 1;
+    const eventArray = data[tripID].days[dayID].events;
+    const eventWithId = eventArray.find((event) => {
+      return event.id === trace.eventID;
+    });
+    const eventIndex = eventArray.indexOf(eventWithId);
 
+    eventArray.splice(eventIndex, 1);
+
+    storeData(data, callback);
+  }
+
+  function removeDay(trace, data, item, callback) {
+    const tripID = parseInt(trace.tripID) - 1;
+    const dayArray = data[tripID].days;
+    dayArray.splice(trace.dayID - 1, 1);
+
+    storeData(data, callback);
+  }
+
+  function removeTrip(trace, data, item, callback) {
+    data.splice(trace.tripID - 1, 1);
+
+    storeData(data, callback);
+  }
+}
+//? EDIT ITEM
 export async function editItem(itemType, trace, newData, callback) {
   getData().then(async (response) => {
+    // perform proper functions based on item type
     switch (itemType) {
       case 'trip':
         editTrip(trace, response, newData, callback);
@@ -56,6 +149,7 @@ export async function editItem(itemType, trace, newData, callback) {
       case 'day':
         editDay(trace, response, newData, callback);
         break;
+
       case 'event':
         await editEvent(trace, response, newData, callback);
         break;
@@ -65,123 +159,54 @@ export async function editItem(itemType, trace, newData, callback) {
         break;
     }
   });
-}
-
-/**
- *
- * @param {{title: string, description: string, time: string,}} value
- * @param {String} trace
- */
-async function addEvent(value, trace, data, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
-  const dayID = parseInt(trace.dayID) - 1;
-  let eventArray = data[tripID].days[dayID].events;
-  let eventId = Date.now();
-
-  let event = {
-    id: eventId,
-    name: value.title,
-    data: value.description,
-    departure: value.time,
-    startTime: value.startTime,
-    type: value.type,
-    duration: value.duration != null ? value.duration : 0,
-    trace: `${tripID} -  ${dayID}`,
-  };
-  eventArray.push(event);
-  await storeData(data, callback, event);
-}
-// addItem(itemType, value, trace, callback)
-// addDay(trace, response, callback);
-function addDay(trace, data, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
-  const dayID = parseInt(data[tripID].days.length + 1);
-
-  let dayArray = data[tripID].days;
-
-  dayArray.push({
-    id: dayID,
-    events: [],
-  });
-
-  storeData(data, callback);
-}
-
-function addTrip(value, data, callback) {
-  const tripID = parseInt(data.length + 1);
-
-  let startDate = value.startDate.split('/');
-  let endDate = value.endDate.split('/');
-
-  if (value.imported == true) {
-    value.startDate = `${startDate[2]}/${startDate[0]}/${startDate[1]}`;
-    value.endDate = `${endDate[2]}/${endDate[0]}/${endDate[1]}`;
-    value.name = value.name.split('.')[0];
-    console.log(startDate);
-  }
-
-  data.push({
-    id: tripID,
-    name: value.name,
-    leaveDate: value.startDate,
-    returnDate: value.endDate,
-    days: [],
-  });
-
-  startDate = value.startDate.split('/');
-  endDate = value.endDate.split('/');
-
-  const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
-  const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
-
-  const differenceInMins = convertedEndDate.getTime() - convertedStartDate.getTime();
-
-  const differenceInDays = differenceInMins / (1000 * 3600 * 24);
-
-  for (let i = 0; i <= differenceInDays; i++) {
-    addDay({ tripID: tripID }, data, () => {});
-  }
-
-  storeData(data, callback);
-}
-
-function removeEvent(trace, data, item, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
-  const dayID = parseInt(trace.dayID) - 1;
-
-  let eventArray = data[tripID].days[dayID].events;
-  console.log(eventArray);
-  console.log(
-    eventArray.find((obj) => {
+  async function editEvent(trace, response, newData, callback) {
+    const tripID = parseInt(trace.tripID) - 1;
+    const dayID = parseInt(trace.dayID) - 1;
+    const eventArray = response[tripID].days[dayID].events;
+    const eventWithId = eventArray.find((obj) => {
       return obj.id == trace.eventID;
-    })[0]
-  );
-  eventArray.splice(
-    eventArray.indexOf(
-      eventArray.find((obj) => {
-        return obj.id === trace.eventID;
-      })
-    ),
-    1
-  );
+    });
+    const indexOfEvent = eventArray.indexOf(eventWithId);
+    const item = eventArray[indexOfEvent];
 
-  storeData(data, callback);
-}
+    item.name = newData.name;
+    item.data = newData.data;
+    item.departure = newData.departure;
+    item.startTime = newData.startTime;
+    // data: value.description,
+    // departure: value.time,
+    // startTime: value.startTime,
+    // type: value.type,
+    // duration: value.duration != null ? value.duration : 0,
 
-function removeDay(trace, data, item, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
+    await storeData(response, callback);
+  }
+  // ! Currently Unused
+  function editTrip(value, data, callback) {
+    const tripID = parseInt(data.length + 1);
 
-  let dayArray = data[tripID].days;
+    data.push({
+      id: tripID,
+      name: value.name,
+      leaveDate: value.startDate,
+      returnDate: value.endDate,
+      days: [],
+    });
 
-  dayArray.splice(trace.dayID - 1, 1);
+    // Get the number of day the trip is scheduled to be
+    const startDate = value.startDate.split('/');
+    const endDate = value.endDate.split('/');
+    const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
+    const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
+    const differenceInMins = convertedEndDate.getTime() - convertedStartDate.getTime();
+    const differenceInDays = differenceInMins / (1000 * 3600 * 24);
+    // add a day for each day of the trip
+    for (let i = 0; i <= differenceInDays; i++) {
+      addDay({ tripID: tripID }, data, () => {});
+    }
 
-  storeData(data, callback);
-}
-
-function removeTrip(trace, data, item, callback) {
-  data.splice(trace.tripID - 1, 1);
-
-  storeData(data, callback);
+    storeData(data, callback);
+  }
 }
 
 export async function storeData(value, callback, event) {
@@ -191,82 +216,8 @@ export async function storeData(value, callback, event) {
       callback(value, event);
     });
   } catch (e) {
-    // saving error
     console.log(e);
   }
-}
-//  editEvent(trace, response, item, callback);
-async function editEvent(trace, response, newData, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
-  const dayID = parseInt(trace.dayID) - 1;
-
-  // console.log(response);
-  console.log(newData);
-
-  let eventArray = response[tripID].days[dayID].events;
-
-  let item =
-    eventArray[
-      eventArray.indexOf(
-        eventArray.find((obj) => {
-          return obj.id == trace.eventID;
-        })
-      )
-    ];
-
-  item.name = newData.name;
-  item.data = newData.data;
-  item.departure = newData.departure;
-  item.startTime = newData.startTime;
-  // data: value.description,
-  // departure: value.time,
-  // startTime: value.startTime,
-  // type: value.type,
-  // duration: value.duration != null ? value.duration : 0,
-
-  await storeData(response, callback);
-}
-
-function editDay(trace, data, callback) {
-  const tripID = parseInt(trace.tripID) - 1;
-  const dayID = parseInt(data[tripID].days.length + 1);
-
-  let dayArray = data[tripID].days;
-
-  dayArray.push({
-    id: dayID,
-    events: [],
-  });
-
-  storeData(data, callback);
-}
-
-function editTrip(value, data, callback) {
-  const tripID = parseInt(data.length + 1);
-
-  data.push({
-    id: tripID,
-    name: value.name,
-    leaveDate: value.startDate,
-    returnDate: value.endDate,
-    days: [],
-  });
-
-  const startDate = value.startDate.split('/');
-  const endDate = value.endDate.split('/');
-
-  const convertedStartDate = new Date(`${startDate[1]}/${startDate[2]}/${startDate[0]}`);
-  const convertedEndDate = new Date(`${endDate[1]}/${endDate[2]}/${endDate[0]}`);
-
-  const differenceInMins = convertedEndDate.getTime() - convertedStartDate.getTime();
-
-  const differenceInDays = differenceInMins / (1000 * 3600 * 24);
-
-  for (let i = 0; i <= differenceInDays; i++) {
-    addDay({ tripID: tripID }, data, () => {});
-  }
-
-  storeData(data, callback);
 }
 
 export async function getData() {

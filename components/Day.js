@@ -1,16 +1,17 @@
+import { Feather, Ionicons, SimpleLineIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
-import EventTimeLine from './EventTimeLine';
 import { getData, removeItem } from './dataHandler';
-import SlideInView from './slideView';
-import Header from './Header';
-
-import { Feather, Ionicons, SimpleLineIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { renderers } from 'react-native-popup-menu';
-
+import React, { useEffect, useState } from 'react';
+import { get12HourTime } from './timeConvert';
+import EventTimeLine from './EventTimeLine';
+import OpacityButton from './OpacityButton';
+import SlideInView from './slideView';
+import { theme } from './Styles';
+import Header from './Header';
 /**
 ------------------------------------------------------------------------------------------------
 DESCRIPTION:
@@ -22,21 +23,53 @@ INPUT PARAMETERS:
 ------------------------------------------------------------------------------------------------
 */
 export default function Day({ route, navigation }) {
+  const [expandAddMenu, setExpandAddMenu] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [tripName, setTripName] = useState('');
   const [dayData, setDayData] = useState({});
+  const [refresh, setRefresh] = useState(0);
   const [events, setEvents] = useState([]);
   const [time, setTime] = useState();
-  const [editMode, setEditMode] = useState(false);
-  const [expandAddMenu, setExpandAddMenu] = useState(false);
   const trace = route.params.trace;
-  const [refresh, setRefresh] = useState(0);
 
-  /**
-   * Gets the data from the data handler, then sets the "dayData", "tripName", and "events" state variables
-   */
+  /* A hook that is called when the screen is focused. */
+  useFocusEffect(
+    React.useCallback(() => {
+      updateData();
+    }, [])
+  );
+
+  /* Setting an interval to update the time every 15 seconds. */
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 15000);
+    /* A cleanup function that is called when the component is unmounted. */
+    return () => {
+      clearInterval(interval);
+    };
+  }, [15000]);
+
+  const navigateTo = async (location, eventData) => {
+    route.params.trace.eventID = eventData.id;
+    navigation.navigate(location, {
+      data: eventData,
+      trace: route.params.trace,
+      date: route.params.date,
+      editMode: editMode,
+    });
+  };
+
+  const notLast = (events, item) => {
+    return events.indexOf(item) < events.length - 1;
+  };
+
+  const nextIsTravel = (events, item) => {
+    return (
+      events[events.indexOf(item) + 1].type === 'travel' ||
+      events[events.indexOf(item) + 1].type === 'drive'
+    );
+  };
+
   const updateData = () => {
-    console.log('update Data in Day');
-
     getData().then((response) => {
       setDayData(response[trace.tripID - 1].days[trace.dayID - 1]);
       setTripName(response[trace.tripID - 1].name);
@@ -60,62 +93,8 @@ export default function Day({ route, navigation }) {
     });
   };
 
-  /* A hook that is called when the screen is focused. */
-  useFocusEffect(
-    React.useCallback(() => {
-      updateData();
-    }, [])
-  );
-
-  /* Setting an interval to update the time every 15 seconds. */
-  useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 15000);
-
-    /* A cleanup function that is called when the component is unmounted. */
-    return () => {
-      clearInterval(interval);
-    };
-  }, [15000]);
-
-  /**
-   * "navigateTo" is a function that takes two parameters, "location" and "eventData", and then
-   * navigates to the location with the eventData.
-   * @param location - the name of the screen you want to navigate to
-   * @param eventData - this is the data that is passed to the function.
-   */
-  const navigateTo = async (location, eventData) => {
-    route.params.trace.eventID = eventData.id;
-    navigation.navigate(location, {
-      data: eventData,
-      trace: route.params.trace,
-      date: route.params.date,
-      editMode: editMode,
-    });
-  };
-
-  const get12HourTime = (time) => {
-    let hour = time.split(':')[0];
-    let am = 'AM';
-    if (hour < 12 && hour > 0) {
-      am = 'AM';
-    } else {
-      if (hour == 0) {
-        hour = 12;
-      } else {
-        hour = hour - 12;
-        if (hour == 0) {
-          hour = 12;
-        }
-        am = 'PM';
-      }
-    }
-    /* Returning a string with the hour, minutes, and AM/PM. */
-    return `${hour}:${time.split(':')[1]} ${am}`;
-  };
-
   return (
     <View style={[styles.container, editMode && styles.editModeContainer]}>
-      {/* A custom component that is used to display the header. */}
       <Header
         title={`Day ${dayData.id}`}
         backTo={'Trip'}
@@ -123,16 +102,23 @@ export default function Day({ route, navigation }) {
         subtitle={tripName}
       >
         {editMode ? (
-          <TouchableOpacity onPress={() => setEditMode(!editMode)}>
-            <View style={styles.saveButton}>
-              <MaterialCommunityIcons name="lock-outline" size={26} color={'white'} />
-              <Text style={styles.saveText}> Save</Text>
-            </View>
-          </TouchableOpacity>
+          <OpacityButton
+            text={'Save'}
+            buttonStyle={styles.saveButton}
+            textStyle={styles.saveText}
+            onPress={() => setEditMode(!editMode)}
+          >
+            <MaterialCommunityIcons name="lock-outline" size={26} color={theme.colors.white} />
+          </OpacityButton>
         ) : (
           <Menu renderer={renderers.ContextMenu}>
             <MenuTrigger>
-              <Feather name="more-horizontal" size={30} style={styles.options} />
+              <Feather
+                name="more-horizontal"
+                size={30}
+                style={styles.options}
+                color={theme.colors.text}
+              />
             </MenuTrigger>
             <MenuOptions customStyles={MenuStyle}>
               <MenuOption
@@ -164,52 +150,61 @@ export default function Day({ route, navigation }) {
                     onPress={() => navigateTo('Event', item)}
                   >
                     <View style={styles.dayItem}>
-                      {/* The name of the event. */}
                       <Text style={styles.dayText}>{item.name}</Text>
-                      {/*  The departure time of the event. */}
                       <Text style={styles.departure}>
                         {item.departure != '' && (
-                          <MaterialCommunityIcons name="clock" size={12} color="#5c5c5c" />
+                          <MaterialCommunityIcons
+                            name="clock"
+                            size={12}
+                            color={theme.colors.text}
+                          />
                         )}
                         {item.departure != '' && get12HourTime(item.departure)}
                       </Text>
                     </View>
                   </TouchableOpacity>
-                  {events.indexOf(item) < events.length - 1 &&
-                  (events[events.indexOf(item) + 1].type === 'travel' ||
-                    events[events.indexOf(item) + 1].type === 'drive') ? (
-                    editMode ? (
-                      <Menu renderer={renderers.ContextMenu}>
-                        <MenuTrigger>
-                          <Text style={styles.travel}>
-                            <MaterialCommunityIcons name="car" size={16} color="#5c5c5c" />
-                            {events[events.indexOf(item) + 1].duration}
-                          </Text>
-                        </MenuTrigger>
-                        <MenuOptions customStyles={MenuStyle}>
-                          <MenuOption
-                            onSelect={() => {
-                              let newTrace = trace;
-                              newTrace.eventID = parseFloat(item.startTime.replace(':', '')) + 0.1;
-                              console.log(newTrace);
-                              removeItem('event', trace, events[events.indexOf(item) + 1], () => {
-                                updateData();
-                                setRefresh((refresh) => refresh + 1);
-                              });
-                            }}
-                            text="Remove Travel Time"
-                          />
-                        </MenuOptions>
-                      </Menu>
+
+                  {
+                    // Display travel information
+                    notLast(events, item) && nextIsTravel(events, item) ? (
+                      editMode ? (
+                        <Menu renderer={renderers.ContextMenu}>
+                          <MenuTrigger>
+                            <Text style={styles.travel}>
+                              <MaterialCommunityIcons
+                                name="car"
+                                size={16}
+                                color={theme.colors.text}
+                              />
+                              {events[events.indexOf(item) + 1].duration}
+                            </Text>
+                          </MenuTrigger>
+                          <MenuOptions customStyles={MenuStyle}>
+                            <MenuOption
+                              onSelect={() => {
+                                let newTrace = trace;
+                                newTrace.eventID =
+                                  parseFloat(item.startTime.replace(':', '')) + 0.1;
+                                console.log(newTrace);
+                                removeItem('event', trace, events[events.indexOf(item) + 1], () => {
+                                  updateData();
+                                  setRefresh((refresh) => refresh + 1);
+                                });
+                              }}
+                              text="Remove Travel Time"
+                            />
+                          </MenuOptions>
+                        </Menu>
+                      ) : (
+                        <Text style={styles.travel}>
+                          <MaterialCommunityIcons name="car" size={16} color={theme.colors.text} />
+                          {events[events.indexOf(item) + 1].duration}
+                        </Text>
+                      )
                     ) : (
-                      <Text style={styles.travel}>
-                        <MaterialCommunityIcons name="car" size={16} color="#5c5c5c" />
-                        {events[events.indexOf(item) + 1].duration}
-                      </Text>
+                      <View style={{ height: 16 }}></View>
                     )
-                  ) : (
-                    <View style={{ height: 16 }}></View>
-                  )}
+                  }
                 </View>
               </EventTimeLine>
             </SlideInView>
@@ -218,42 +213,38 @@ export default function Day({ route, navigation }) {
       ></FlatList>
 
       {/* Fade out list view */}
-      <LinearGradient colors={['rgba(255, 255, 255, 0)', '#ffffff']} style={styles.gradient} />
+      <LinearGradient
+        colors={['rgba(255, 255, 255, 0)', theme.colors.white]}
+        style={styles.gradient}
+      />
 
       {/* Add event Button */}
       {editMode && (
         <View style={styles.addList}>
           {expandAddMenu && (
             <View>
-              <TouchableOpacity
+              <OpacityButton
                 onPress={() => navigateTo('AddEvent', { dayData: dayData })}
-                style={styles.addOption}
+                buttonStyle={styles.addOption}
+                text={'Location'}
               >
-                <SimpleLineIcons
-                  name="location-pin"
-                  size={16}
-                  style={{ color: '#5c5c5c', marginRight: 10 }}
-                />
-                <Text style={styles.addOptionText}>Location</Text>
-              </TouchableOpacity>
+                <SimpleLineIcons name="location-pin" size={16} style={styles.icon} />
+              </OpacityButton>
 
-              <TouchableOpacity
+              <OpacityButton
                 onPress={() => navigateTo('AddTravel', { dayData: dayData })}
                 style={styles.addOption}
+                buttonStyle={styles.addOption}
+                text={'Travel Time'}
               >
-                <Ionicons name="car" size={16} style={{ color: '#5c5c5c', marginRight: 10 }} />
-                <Text style={styles.addOptionText}>Travel Time</Text>
-              </TouchableOpacity>
+                <Ionicons name="car" size={16} style={styles.icon} />
+              </OpacityButton>
             </View>
           )}
 
-          <TouchableOpacity
-            // onPress={() => navigateTo('AddEvent', { dayData: dayData })}
-            onPress={() => setExpandAddMenu(!expandAddMenu)}
-            style={styles.add}
-          >
+          <TouchableOpacity onPress={() => setExpandAddMenu(!expandAddMenu)} style={styles.add}>
             <View>
-              <Feather name="plus" size={30} style={{ color: 'white' }} />
+              <Feather name="plus" size={30} style={{ color: theme.colors.white }} />
             </View>
           </TouchableOpacity>
         </View>
@@ -266,8 +257,13 @@ export default function Day({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     padding: 20,
+  },
+
+  icon: {
+    color: theme.colors.text,
+    marginRight: 10,
   },
   locationAndTravel: {
     flex: 1,
@@ -278,7 +274,7 @@ const styles = StyleSheet.create({
   },
 
   editModeContainer: {
-    borderColor: '#67dfe8',
+    borderColor: theme.colors.accent,
     borderWidth: 5,
     padding: 15,
   },
@@ -287,35 +283,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
 
-  currentTimeLine: {
-    position: 'absolute',
-
-    marginTop: 23,
-    marginLeft: 75,
-    transform: [
-      { translateX: -10 },
-      {
-        translateY: 57.5 * 6.88,
-      },
-    ],
-
-    zIndex: 10,
-    width: 20,
-    height: 2,
-    backgroundColor: '#67dfe8',
-  },
-
-  menu: {
-    borderRadius: 500,
-    marginTop: 10,
-  },
-
   saveButton: {
-    padding: 5,
+    paddingTop: 5,
+    paddingBottom: 5,
     paddingHorizontal: 15,
-    display: 'flex',
-    flexDirection: 'row',
-    backgroundColor: '#67dfe8',
+    backgroundColor: theme.colors.accent,
     borderRadius: 500,
   },
 
@@ -334,41 +306,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginVertical: 5,
     alignSelf: 'flex-end',
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
   },
 
   addOptionText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
   saveText: {
-    color: 'white',
+    color: theme.colors.white,
     padding: 5,
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 
   dayItem: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     // flexDirection: '',
     justifyContent: 'space-between',
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
 
-  departure: { fontSize: 12 },
+  departure: {
+    fontSize: 12,
+    color: theme.colors.text,
+  },
 
   addEvent: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
   },
 
@@ -381,7 +354,7 @@ const styles = StyleSheet.create({
 
   dayText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 
   dayCard: {
@@ -396,13 +369,14 @@ const styles = StyleSheet.create({
   },
   travel: {
     marginLeft: 10,
+    color: theme.colors.text,
   },
 
   add: {
-    backgroundColor: '#7ff8f8',
+    backgroundColor: theme.colors.accent,
     borderRadius: 5000,
     padding: 20,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     alignSelf: 'flex-end',
   },
 });
@@ -413,7 +387,8 @@ const MenuStyle = {
     paddingVertical: 2,
     marginTop: 25,
     width: 150,
-    borderRadius: 5,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.sizes.borderRadius,
   },
 
   optionsWrapper: {},
@@ -421,10 +396,10 @@ const MenuStyle = {
     margin: 5,
   },
   optionTouchable: {
-    activeOpacity: 70,
+    activeOpacity: 0,
   },
   optionText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 };

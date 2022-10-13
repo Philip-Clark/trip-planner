@@ -20,8 +20,8 @@ import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-m
 import { renderers } from 'react-native-popup-menu';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
-import { importCSV } from './csvHandler';
 import { usePapaParse } from 'react-papaparse';
+import { theme } from './Styles';
 
 export default function Trips({ navigation }) {
   const [data, setData] = useState([]);
@@ -238,7 +238,7 @@ export default function Trips({ navigation }) {
         onPress={() => navigation.navigate('AddTrip', { trace: trace })}
       >
         <View>
-          <Feather name="plus" size={30} style={{ color: 'white' }} />
+          <Feather name="plus" size={30} style={{ color: theme.colors.white }} />
         </View>
       </TouchableOpacity>
     </View>
@@ -253,14 +253,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'visible',
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     padding: 20,
   },
   headerText: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#5c5c5c',
-    borderColor: '#f5f5f5ff',
+    color: theme.colors.text,
+    borderColor: theme.colors.itemColor,
     borderBottomWidth: 1,
     paddingBottom: 5,
     marginBottom: 5,
@@ -268,24 +268,28 @@ const styles = StyleSheet.create({
 
   optionsIcon: {
     marginVertical: 7.5,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     width: 32,
   },
 
   tripItem: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
+  },
+
+  options: {
+    color: theme.colors.text,
   },
   tripText: {
     fontSize: 16,
     paddingVertical: 15,
 
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
   trips: {
     overflow: 'visible',
@@ -293,23 +297,23 @@ const styles = StyleSheet.create({
 
   add: {
     position: 'absolute',
-    backgroundColor: '#7ff8f8',
+    backgroundColor: theme.colors.accent,
     borderRadius: 5000,
     bottom: 0,
     right: 0,
     margin: 20,
     padding: 20,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
   modalDimmer: {
     flex: 1,
     backgroundColor: '#00000098',
   },
   modal: {
-    borderRadius: 10,
+    borderRadius: theme.sizes.borderRadius,
     alignContent: 'space-between',
     flexDirection: 'column',
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     margin: 50,
     padding: 30,
     marginVertical: 100,
@@ -320,16 +324,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 40,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     margin: 1,
     textAlign: 'center',
+    borderColor: theme.colors.text,
+    color: theme.colors.text,
   },
 
   done: {
-    backgroundColor: '#f5f5f5ff',
+    backgroundColor: theme.colors.itemColor,
     paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: theme.sizes.borderRadius,
     margin: 10,
   },
 
@@ -337,7 +343,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 });
 
@@ -347,7 +353,8 @@ const MenuStyle = {
     paddingVertical: 2,
     marginTop: 25,
     width: 100,
-    borderRadius: 5,
+    backgroundColor: theme.colors.itemColor,
+    borderRadius: theme.sizes.borderRadius,
   },
 
   optionsWrapper: {},
@@ -359,6 +366,6 @@ const MenuStyle = {
   },
   optionText: {
     fontSize: 16,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
 };

@@ -9,6 +9,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 import { useFocusEffect } from '@react-navigation/native';
 import OpacityButton from './OpacityButton';
 import { theme } from './Styles';
+import { Feather } from '@expo/vector-icons';
 
 /**
  * This view is used to add an event to the database
@@ -46,32 +47,6 @@ export default function AddTravel({ navigation, route }) {
   };
 
   /**
-   * If the hour is less than 12 and greater than 0, it's AM. If the hour is 0, it's 12 AM. If the hour
-   * is greater than 12, it's PM. If the hour is 12, it's 12 PM.
-   * @param time - The time in 24 hour format.
-   * @returns A string with the hour, minutes, and AM/PM.
-   */
-  const get12HourTime = (time) => {
-    let hour = time.split(':')[0];
-    let am = 'AM';
-    if (hour < 12 && hour > 0) {
-      am = 'AM';
-    } else {
-      if (hour == 0) {
-        hour = 12;
-      } else {
-        hour = hour - 12;
-        if (hour == 0) {
-          hour = 12;
-        }
-        am = 'PM';
-      }
-    }
-    /* Returning a string with the hour, minutes, and AM/PM. */
-    return `${hour}:${time.split(':')[1]} ${am}`;
-  };
-
-  /**
    * If the title, description, and duration are not empty, then add the item to the database and go back
    * to the previous screen.
    *
@@ -99,13 +74,31 @@ export default function AddTravel({ navigation, route }) {
   return (
     <View style={styles.container}>
       <SelectDropdown
-        buttonStyle={{ width: '100%' }}
+        buttonStyle={{ width: '100%', backgroundColor: theme.colors.itemColor }}
+        buttonTextStyle={{ color: theme.colors.text, paddingRight: 30 }}
+        rowStyle={{
+          marginTop: 0,
+          backgroundColor: theme.colors.itemColor,
+          borderColor: theme.colors.text,
+        }}
+        rowTextStyle={{ color: theme.colors.text }}
+        dropdownStyle={{
+          marginTop: -35,
+          height: '60%',
+          backgroundColor: theme.colors.itemColor,
+          borderRadius: theme.sizes.borderRadius,
+        }}
         defaultButtonText={'Select event'}
         data={events}
         onSelect={(selectedItem, index) => {
           console.log(selectedItem);
           setStartTime(selectedItem.startTime + '.1');
         }}
+        renderDropdownIcon={() => {
+          return <Feather name="chevron-down" size={30} style={{ color: theme.colors.text }} />;
+        }}
+        dropdownOverlayColor={'transparent'}
+        dropdownIconPosition={'left'}
         buttonTextAfterSelection={(selectedItem, index) => {
           // text represented after item is selected
           // if data array is an array of objects then return selectedItem.property to render after item is selected
@@ -125,7 +118,7 @@ export default function AddTravel({ navigation, route }) {
       {/* A modal that is used to display the time picker for the event duration. */}
       <Modal
         animationType="fade"
-        transparent={false}
+        transparent={true}
         visible={showDurationPicker}
         onRequestClose={() => {
           setShowDurationPicker(false);
@@ -135,6 +128,7 @@ export default function AddTravel({ navigation, route }) {
           <DatePicker
             style={styles.timePicker}
             mode="time"
+            options={styles.calender}
             minuteInterval={5}
             onTimeChange={(selectedTime) => handleDurationSelection(selectedTime)}
           />
@@ -152,9 +146,16 @@ export default function AddTravel({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  calender: {
+    backgroundColor: theme.colors.white,
+    mainColor: theme.colors.accent,
+    textDefaultColor: theme.colors.text,
+    textHeaderColor: theme.colors.text,
+  },
+
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     borderColor: theme.colors.accent,
     borderWidth: 5,
     padding: 15,
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     padding: 3,
     alignContent: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.modalBackground,
   },
 
   timePicker: {

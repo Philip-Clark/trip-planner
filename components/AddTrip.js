@@ -41,6 +41,7 @@ export default function AddTrip({ navigation, route }) {
       <TextInput
         // Title Input
         placeholder={'Title'}
+        placeholderTextColor={theme.colors.text}
         style={styles.textInput}
         onChangeText={(input) => setTitle(input)}
       />
@@ -72,6 +73,7 @@ export default function AddTrip({ navigation, route }) {
           <DatePicker
             // Start date Selector
             style={styles.timePicker}
+            options={styles.calender}
             mode="calendar"
             maximumDate={endTime}
             onDateChange={(selectedTime) => selectStart(selectedTime)}
@@ -93,6 +95,7 @@ export default function AddTrip({ navigation, route }) {
             // End date Selector
             style={styles.timePicker}
             minimumDate={startTime}
+            options={styles.calender}
             current={startTime}
             mode="calendar"
             onDateChange={(selectedTime) => selectEnd(selectedTime)}
@@ -106,6 +109,12 @@ export default function AddTrip({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  calender: {
+    backgroundColor: theme.colors.white,
+    mainColor: theme.colors.accent,
+    textDefaultColor: theme.colors.text,
+    textHeaderColor: theme.colors.text,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.white,
@@ -122,7 +131,7 @@ const styles = StyleSheet.create({
   },
 
   timePicker: {
-    borderRadius: 30,
+    borderRadius: theme.sizes.borderRadius,
     elevation: 10,
   },
 

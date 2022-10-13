@@ -2,6 +2,7 @@ import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import { Feather } from '@expo/vector-icons';
 import { editItem } from './dataHandler';
 import { StatusBar } from 'expo-status-bar';
+import { theme } from './Styles';
 export default function Header({
   children,
   title,
@@ -65,7 +66,7 @@ export default function Header({
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    borderColor: '#f5f5f5ff',
+    borderColor: theme.colors.itemColor,
     borderBottomWidth: 2,
     paddingBottom: 10,
   },
@@ -86,16 +87,17 @@ const styles = StyleSheet.create({
   },
 
   subTitle: {
-    color: '#a7a7a7ff',
+    color: theme.colors.text,
+    opacity: 0.5,
     fontSize: 20,
     lineHeight: 20,
   },
 
   editable: {
-    borderColor: '#969696',
+    borderColor: theme.colors.text,
     borderWidth: 1,
     borderStyle: 'solid',
-    borderRadius: 10,
+    borderRadius: theme.sizes.borderRadius,
     textAlign: 'left',
     paddingVertical: 2,
     paddingHorizontal: 5,
@@ -104,16 +106,16 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     lineHeight: 35,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     textAlign: 'left',
   },
 
   backText: {
     fontSize: 30,
-    color: '#5c5c5c',
+    color: theme.colors.text,
   },
   delete: {
-    color: '#5c5c5c',
+    color: theme.colors.text,
     right: 0,
     lineHeight: 29,
     height: '100%',

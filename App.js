@@ -9,6 +9,7 @@ import AddTrip from './components/AddTrip';
 import { Animated } from 'react-native';
 import { MenuProvider } from 'react-native-popup-menu';
 import AddTravel from './components/AddTravel';
+import { theme } from './components/Styles';
 
 export default function App() {
   const forSlide = ({ current, next, inverted, layouts: { screen } }) => {
@@ -90,7 +91,7 @@ export default function App() {
   const Stack = createStackNavigator();
 
   return (
-    <MenuProvider style={{ paddingTop: 40, backgroundColor: 'white' }}>
+    <MenuProvider style={{ paddingTop: 40, backgroundColor: theme.colors.white }}>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen

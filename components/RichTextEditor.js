@@ -105,6 +105,10 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
             androidHardwareAccelerationDisabled={true}
             initialHeight={100}
             allowsLinkPreview={true}
+            editorStyle={{
+              backgroundColor: 'transparent',
+              color: theme.colors.text,
+            }}
           />
         </View>
       </ScrollView>
@@ -166,6 +170,7 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
                 onChangeText={(text) => {
                   getNewLinkPreview(text);
                 }}
+                placeholderTextColor={theme.colors.text}
                 style={styles.link}
                 placeholder="https://"
               />
@@ -209,6 +214,8 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
               >
                 <TextInput
                   multiline={true}
+                  placeholderTextColor={theme.colors.text}
+                  style={{ color: theme.colors.text }}
                   placeholder="<h1 style='textAlign: center'> Hello </h1>"
                   onChangeText={(text) => {
                     setCode(text);
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.sizes.borderRadius,
     alignContent: 'space-between',
     flexDirection: 'column',
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.white,
     margin: 10,
     padding: 20,
     minHeight: 300,
@@ -257,12 +264,14 @@ const styles = StyleSheet.create({
   Title: {
     textAlign: 'center',
     fontSize: 20,
+    color: theme.colors.text,
     marginBottom: 10,
   },
 
   link: {
     backgroundColor: theme.colors.itemColor,
     padding: 5,
+    color: theme.colors.text,
     paddingHorizontal: 10,
     marginVertical: 10,
     borderRadius: theme.sizes.borderRadius,

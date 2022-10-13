@@ -1,5 +1,7 @@
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import React, { useState } from 'react';
+import { theme } from './Styles';
+import { get12HourTime } from './timeConvert';
 
 /**
 ------------------------------------------------------------------------------------------------
@@ -95,30 +97,6 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
     return 1 - getLineSize();
   };
 
-  /** 
-    Returns the start time of the current event 
-    in a readable 12-hour time format.
-    Includes AM or PM time stamps.
-  */
-  const get12HourTime = () => {
-    let hour = item.startTime.split(':')[0];
-    let am = 'AM/PM';
-    if (hour < 12 && hour > 0) {
-      am = 'AM';
-    } else {
-      if (hour == 0) {
-        hour = 12;
-      } else {
-        hour = hour - 12;
-        if (hour == 0) {
-          hour = 12;
-        }
-        am = 'PM';
-      }
-    }
-    return `${hour}:${item.startTime.split(':')[1].padStart(2, '0')} ${am}`;
-  };
-
   /** Set the dot color based on if the events start time is passed or not. */
   const setDotColor = () => {
     if (newColorValue != 100 && currentTime >= thisTime) {
@@ -148,7 +126,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
     >
       {/* START TIME */}
       <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.timeText}>
-        {get12HourTime()}
+        {get12HourTime(item.startTime)}
       </Text>
       {/* DOT */}
       <Animated.View
@@ -157,7 +135,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
           {
             backgroundColor: animation.interpolate({
               inputRange: [0, 100],
-              outputRange: ['rgba(245, 245, 245, 1)', 'rgb(127, 248, 248)'],
+              outputRange: [theme.colors.itemColor, theme.colors.accent],
             }),
           },
         ]}
@@ -169,7 +147,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
               style={[
                 styles.line,
                 { height: getLineSize() * (getTimeDifference() + getHalfHeight()) },
-                { backgroundColor: '#7ff8f8' },
+                { backgroundColor: theme.colors.accent },
               ]}
             />
             {/* GREY LINE */}
@@ -180,7 +158,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
                   height:
                     (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + getHalfHeight()),
                 },
-                { backgroundColor: '#f5f5f5ff' },
+                { backgroundColor: theme.colors.itemColor },
               ]}
             />
           </View>
@@ -207,13 +185,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
     width: 20,
     height: 2,
-    backgroundColor: '#67dfe8',
+    backgroundColor: theme.colors.accent,
   },
 
   timeText: {
     fontSize: 16,
     width: 70,
-    color: '#5c5c5c',
+    color: theme.colors.text,
     alignSelf: 'center',
   },
 
@@ -237,8 +215,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignSelf: 'center',
     top: 10,
-    borderColor: '#f5f5f5ff',
-    backgroundColor: '#f5f5f5ff',
+    borderColor: theme.colors.itemColor,
+    backgroundColor: theme.colors.itemColor,
     width: 2,
     height: 0,
   },
