@@ -28,9 +28,15 @@ const LinkRenderer = function LinkRenderer({ TDefaultRenderer, tnode, ...props }
       <View style={styles.linkPreviewContainer}>
         <Image source={{ uri: linkImage }} style={styles.linkImage} />
         <View style={styles.linkDetails}>
-          <Text style={styles.linkTitle}>{linkData.title}</Text>
-          <Text style={styles.linkDescription}>{linkData.description}</Text>
-          <Text style={styles.linkUrl}>{linkData.url}</Text>
+          <Text style={styles.linkTitle} ellipsizeMode="tail" numberOfLines={1}>
+            {linkData.title}
+          </Text>
+          <Text style={styles.linkDescription} ellipsizeMode="tail" numberOfLines={2}>
+            {linkData.description}
+          </Text>
+          <Text style={styles.linkUrl} ellipsizeMode="tail" numberOfLines={1}>
+            {linkData.url}
+          </Text>
         </View>
       </View>
     </TDefaultRenderer>
@@ -57,7 +63,7 @@ const styles = StyleSheet.create({
   },
   linkImage: {
     width: 100,
-    height: 100,
+    height: '100%',
     borderRadius: theme.sizes.borderRadius,
   },
   linkDetails: {
@@ -69,19 +75,19 @@ const styles = StyleSheet.create({
 
   linkTitle: {
     fontSize: 24,
-    height: 25,
+    color: theme.colors.text,
   },
 
   linkDescription: {
     fontSize: 14,
-    height: 44,
+    opacity: 0.8,
+    minHeight: 32,
     color: theme.colors.text,
   },
 
   linkUrl: {
     fontSize: 20,
-    height: 20,
-    marginTop: 6,
-    color: '#bfbfbf',
+    opacity: 0.2,
+    color: theme.colors.text,
   },
 });

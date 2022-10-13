@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignContent: 'center',
+    maxWidth: '50%',
     colors: theme.colors.text,
   },
 

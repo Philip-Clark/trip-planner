@@ -28,9 +28,9 @@ export const theme = {
   // colors: {
   //   white: '#1d1e23',
   //   itemColor: '#171717ff',
-  //   text: '#fafafa',
+  //   text: '#9e9e9e',
   //   modalBackground: '#00000066',
-  //   accent: '#51ffc2',
+  //   accent: '#408f82',
   // },
 
   sizes: {
