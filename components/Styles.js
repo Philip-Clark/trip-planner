@@ -17,6 +17,7 @@ export const theme = {
       alignSelf: 'center',
     },
   }),
+
   colors: {
     white: '#ffffff',
     itemColor: '#f5f5f5ff',
@@ -25,16 +26,17 @@ export const theme = {
     accent: '#67dfe8',
   },
   // ? DARK theme
-  // colors: {
-  //   white: '#1d1e23',
-  //   itemColor: '#171717ff',
-  //   text: '#9e9e9e',
-  //   modalBackground: '#00000066',
-  //   accent: '#408f82',
-  // },
+  colors: {
+    white: '#252525',
+    itemColor: '#363636',
+    text: '#afafaf',
+    modalBackground: '#00000066',
+    accent: '#d55252',
+  },
 
   sizes: {
     borderRadius: 5,
+    standardElevation: 2,
     // borderRadius: 50,
   },
 };

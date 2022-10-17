@@ -12,9 +12,10 @@ export default function Header({
   subtitle = '',
   editable,
   route,
+  style,
 }) {
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, style]}>
       <StatusBar style="dark" />
       {back ? (
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack(null)}>
@@ -24,7 +25,13 @@ export default function Header({
         <></>
       )}
       <View style={styles.titles}>
-        {subtitle != '' ? <Text style={styles.subTitle}>{subtitle}</Text> : <></>}
+        {subtitle != '' ? (
+          <Text style={styles.subTitle} ellipsizeMode="tail" numberOfLines={2}>
+            {subtitle}
+          </Text>
+        ) : (
+          <></>
+        )}
         {editable ? (
           <TextInput
             style={[styles.title, styles.editable]}
@@ -36,7 +43,9 @@ export default function Header({
             }}
           />
         ) : (
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title} ellipsizeMode="tail" numberOfLines={2}>
+            {title}
+          </Text>
         )}
       </View>
       {back ? (

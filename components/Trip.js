@@ -136,6 +136,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
+    elevation: theme.sizes.standardElevation,
+    marginHorizontal: 5,
   },
   tripText: {
     fontSize: 16,

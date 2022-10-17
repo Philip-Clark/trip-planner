@@ -38,9 +38,9 @@ export default function Event({ route, navigation }) {
     const date = new Date(selectedDate);
     setShowDeparturePicker(false);
     console.log(selectedDate);
-    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
+    setDeparture(`${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`);
     let dat = route.params.data;
-    dat.departure = `${date.getHours()}:${date.getMinutes()}`;
+    dat.departure = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
     editItem('event', route.params.trace, dat, () => {});
   };
 
@@ -53,19 +53,12 @@ export default function Event({ route, navigation }) {
   const onStartTimeChange = async (event, selectedDate) => {
     setShowStartTimePicker(false);
     const date = new Date(selectedDate);
-    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
+    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`);
     let dat = route.params.data;
-    dat.startTime = `${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`;
-    dat.id = `${date.getHours()}${date.getMinutes().toString().padEnd(2, '0')}`;
+    dat.startTime = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    dat.id = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
     await editItem('event', route.params.trace, dat, () => {});
   };
-
-  /**
-   * If the hour is less than 12 and greater than 0, it's AM. If the hour is 0, it's 12 AM. If the hour
-   * is greater than 12, it's PM. If the hour is 12, it's 12 PM.
-   * @param time - The time in 24 hour format.
-   * @returns A string with the hour, minutes, and AM/PM.
-   */
 
   /**
    * When the delete button is pressed, the event is removed from the database and the user is returned
@@ -174,6 +167,7 @@ export default function Event({ route, navigation }) {
           <ScrollView>
             <View style={{ marginBottom: 300 }}>
               <RenderHtml
+                baseStyle={{ color: theme.colors.text }}
                 source={{ html: route.params.data.data }}
                 style={styles.text}
                 renderers={AnchorRenderer}

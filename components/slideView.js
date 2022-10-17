@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Animated, Easing } from 'react-native';
+import { theme } from './Styles';
 
 export default function SlideInView({ offset, children }) {
   const slideAnim = useRef(new Animated.Value(100)).current; // Initial value for opacity: 0

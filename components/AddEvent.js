@@ -27,13 +27,13 @@ export default function AddEvent({ navigation, route }) {
   const onDepartureTimeChange = (event, selectedDate) => {
     setShowDeparturePicker(false);
     const date = new Date(selectedDate);
-    setDeparture(`${date.getHours()}:${date.getMinutes()}`);
+    setDeparture(`${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`);
   };
 
   const onStartTimeChange = (event, selectedDate) => {
     setShowStartTimePicker(false);
     const date = new Date(selectedDate);
-    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padEnd(2, '0')}`);
+    setStartTime(`${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`);
   };
 
   const saveAndExit = () => {

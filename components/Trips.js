@@ -19,9 +19,8 @@ import moment from 'moment/moment';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { renderers } from 'react-native-popup-menu';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import { usePapaParse } from 'react-papaparse';
 import { theme } from './Styles';
+import { parsInputFile } from './csvImporter';
 
 export default function Trips({ navigation }) {
   const [data, setData] = useState([]);
@@ -29,8 +28,6 @@ export default function Trips({ navigation }) {
   const [refresh, setRefresh] = useState(0);
   const [importModalVisible, setImportModalVisible] = useState(false);
   const [importFile, setImportFile] = useState('');
-  const [importFileString, setImportFileString] = useState('');
-  const { readString } = usePapaParse();
 
   const navigateToTrip = async (tripData) => {
     navigation.navigate('Trip', {
@@ -42,75 +39,6 @@ export default function Trips({ navigation }) {
   const pickFile = async () => {
     DocumentPicker.getDocumentAsync({ type: ['text/*'] }).then((response) => {
       setImportFile(response);
-    });
-  };
-
-  const parsInputFile = async () => {
-    let tripId = -1;
-    let dayId = 0;
-    // console.log(importFile);
-    await FileSystem.readAsStringAsync(importFile.uri).then((response) => {
-      readString(response, {
-        header: ['Type', 'Date', 'Arrival', 'Departure', 'Title', 'Info', 'Duration'],
-        complete: function (results) {
-          addItem(
-            'trip',
-            {
-              name: importFile.name,
-              startDate: results.data[0].Date,
-              endDate: results.data[results.data.length - 2].Date,
-              imported: true,
-            },
-            undefined,
-            async (data) => {
-              await iterativelyAddEvent(data, results, tripId, dayId).then(() => {
-                updateData();
-                setRefresh((refresh) => refresh + 1);
-              });
-            }
-          );
-        },
-      });
-    });
-  };
-
-  const waitFor = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  async function asyncForEach(array, callback) {
-    for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array);
-    }
-  }
-
-  const iterativelyAddEvent = async (data, results, tripId, dayId) => {
-    console.log(results.data);
-    tripId = parseInt(data.length);
-    await asyncForEach(results.data, async (element, i) => {
-      if (i > 0 && i < results.data.length - 1) {
-        if (element.Date != results.data[i - 1].Date) {
-          dayId += 1;
-        }
-      }
-      console.log('2');
-      try {
-        let event = {
-          title: element.Title,
-          description: element.Info,
-          time: element.Departure,
-          startTime: element.Arrival,
-          type: element.Type.toLowerCase(),
-          duration: element.Duration,
-        };
-
-        if (element.Arrival == '') {
-          if (element.Title == '') {
-            event.startTime = results.data[i - 1].Arrival.split(' ')[0] + '.1';
-          } else {
-            event.startTime = results.data[i - 1].Arrival.split(' ')[0];
-          }
-        }
-        await addItem('event', event, { tripID: tripId, dayID: dayId + 1 }, () => {});
-      } catch (e) {}
     });
   };
 
@@ -163,7 +91,11 @@ export default function Trips({ navigation }) {
               style={styles.done}
               onPress={() => {
                 setImportModalVisible(false);
-                parsInputFile();
+
+                parsInputFile(importFile, () => {
+                  updateData();
+                  setRefresh((refresh) => refresh + 1);
+                });
               }}
             >
               <Text style={styles.doneText}>Import CSV</Text>
@@ -278,8 +210,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
+    marginHorizontal: 5,
     borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
+    elevation: theme.sizes.standardElevation,
   },
 
   options: {

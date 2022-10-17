@@ -2,6 +2,7 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import React, { useState } from 'react';
 import { theme } from './Styles';
 import { get12HourTime } from './timeConvert';
+import { Ionicons } from '@expo/vector-icons';
 
 /**
 ------------------------------------------------------------------------------------------------
@@ -29,7 +30,7 @@ FUNCTIONS:
 export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   const [newColorValue, setNewColorValue] = useState(0);
   const [animation] = useState(new Animated.Value(0));
-  const [layout, setLayout] = useState(0);
+  const [layout, setLayout] = useState({ height: 0, top: 0 });
   const now = new Date();
   let currentTime = now.getTime();
   let events = eventUnsorted.filter((event) => event.type == 'event');
@@ -37,6 +38,11 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   /** Check if this item is the last in the event list */
   const notLastItem = () => {
     return events.indexOf(item) + 1 < events.length;
+  };
+
+  /** Check if this item is the first in the event list */
+  const notFirstItem = () => {
+    return events.indexOf(item) > 0;
   };
 
   /** Temporary date object */
@@ -47,8 +53,14 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   const thisTime = new Date(tempSplitDate.join(' ')).getTime();
 
   // Next time
-  tempSplitDate[4] = notLastItem() ? events[events.indexOf(item) + 1].startTime : '';
+  tempSplitDate[4] = notLastItem() ? events[events.indexOf(item) + 1].startTime : '00:00';
   const nextTime = new Date(tempSplitDate.join(' ')).getTime();
+  const nextTimeString = tempSplitDate[4];
+
+  // previous time
+  tempSplitDate[4] = notFirstItem() ? events[events.indexOf(item) - 1].startTime : '00:00';
+  const lastTime = new Date(tempSplitDate.join(' ')).getTime();
+  const lastTimeString = tempSplitDate[4];
 
   /**
     Returns the difference in time between the currentTime and nextTime. 
@@ -60,11 +72,17 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   };
 
   const getHalfHeight = () => {
-    return layout;
+    return layout.height == undefined ? 0 : layout.height;
+  };
+
+  const getTopPosition = () => {
+    return layout.top == undefined ? 0 : layout.top;
   };
 
   const measureView = (event) => {
-    setLayout(event.nativeEvent.layout.height);
+    if (layout.height == 0) {
+      setLayout(event.nativeEvent.layout);
+    }
   };
 
   /** 
@@ -99,7 +117,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
 
   /** Set the dot color based on if the events start time is passed or not. */
   const setDotColor = () => {
-    if (newColorValue != 100 && currentTime >= thisTime) {
+    if (newColorValue != 100 && currentTime + 15000 >= thisTime) {
       setNewColorValue(100);
     }
     return currentTime >= thisTime;
@@ -114,26 +132,107 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
     duration: 300,
   }).start();
 
+  const isDay = (time) => {
+    return parseFloat(time.replace(':', '.')) <= 18.0 && parseFloat(time.replace(':', '.')) >= 6.0;
+  };
+  const shouldAddMoonIcon = () => {
+    let addMoon = false;
+    if (notFirstItem()) {
+      addMoon = isDay(lastTimeString);
+    } else {
+      addMoon = true;
+    }
+
+    return addMoon;
+  };
+
+  const shouldAddSunIcon = () => {
+    let addSun = false;
+    if (notFirstItem()) {
+      addSun = isDay(lastTimeString);
+    } else {
+      addSun = false;
+    }
+
+    return addSun;
+  };
+
+  const getTimeIndicatorHeight = () => {
+    let returnHeight = 0;
+
+    if (notLastItem()) {
+      if (!isDay(nextTimeString)) {
+        returnHeight = getTimeDifference() + getHalfHeight() + 65;
+      } else {
+        returnHeight = 60;
+      }
+    } else {
+      returnHeight = getTimeDifference() + getHalfHeight() + 0;
+    }
+
+    return returnHeight;
+  };
+
   /**
   
   RETURN 
   
   */
+
   return (
     <Animated.View
       style={[styles.day, { marginBottom: getTimeDifference() }]}
       onLayout={(event) => measureView(event)}
     >
       {/* START TIME */}
-      <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.timeText}>
-        {get12HourTime(item.startTime)}
-      </Text>
+      <View>
+        {!isDay(item.startTime) && (
+          <View
+            style={[
+              styles.nightIndicator,
+              {
+                height: getTimeIndicatorHeight(),
+                top:
+                  isDay(lastTimeString) || !notFirstItem()
+                    ? getTopPosition() - 20
+                    : getTopPosition(),
+              },
+            ]}
+          >
+            {shouldAddMoonIcon() && (
+              <Ionicons name="moon" size={15} style={styles.timeIcon} color={theme.colors.text} />
+            )}
+            {/* {shouldAddSunIcon() && (
+              <Ionicons
+                name="sunny"
+                size={20}
+                style={[
+                  styles.timeIcon,
+                  {
+                    transform: [
+                      { translateY: getTimeDifference() > 40 ? getTimeDifference() : 40 },
+                    ],
+                  },
+                ]}
+                color={theme.colors.text}
+              />
+            )} */}
+          </View>
+        )}
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.timeText}>
+          {get12HourTime(item.startTime).split(' ')[0]}
+        </Text>
+      </View>
       {/* DOT */}
       <Animated.View
         style={[
           styles.dot,
           {
             backgroundColor: animation.interpolate({
+              inputRange: [0, 100],
+              outputRange: [theme.colors.itemColor, theme.colors.accent],
+            }),
+            shadowColor: animation.interpolate({
               inputRange: [0, 100],
               outputRange: [theme.colors.itemColor, theme.colors.accent],
             }),
@@ -146,22 +245,36 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
             <View
               style={[
                 styles.line,
-                { height: getLineSize() * (getTimeDifference() + getHalfHeight()) },
-                { backgroundColor: theme.colors.accent },
-              ]}
-            />
-            {/* GREY LINE */}
-            <View
-              style={[
-                styles.line,
                 {
-                  height:
-                    (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + getHalfHeight()),
+                  height: getLineSize() * (getTimeDifference() + getHalfHeight()) - 5,
+                  backgroundColor: theme.colors.accent,
+                  shadowColor: theme.colors.accent,
                 },
-                { backgroundColor: theme.colors.itemColor },
               ]}
             />
           </View>
+        )}
+        {/* GREY LINE */}
+        <View
+          style={[
+            styles.line,
+            {
+              height: notLastItem()
+                ? (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + getHalfHeight())
+                : 0,
+              shadowColor: theme.colors.itemColor,
+            },
+            { backgroundColor: theme.colors.itemColor },
+          ]}
+        />
+
+        {getLineSize() < 1 && getLineSize() > 0 && (
+          <View
+            style={[
+              styles.bar,
+              { top: getLineSize() * (getTimeDifference() + getHalfHeight()) + 5 },
+            ]}
+          />
         )}
       </Animated.View>
       {children}
@@ -175,7 +288,6 @@ const styles = StyleSheet.create({
   currentTimeLine: {
     // position: 'absolute',
     marginTop: 23,
-    marginLeft: 75,
     transform: [
       { translateX: -10 },
       {
@@ -189,10 +301,29 @@ const styles = StyleSheet.create({
   },
 
   timeText: {
+    paddingLeft: 20,
+    marginRight: 10,
     fontSize: 16,
-    width: 70,
+    width: 55,
+    textAlign: 'center',
     color: theme.colors.text,
     alignSelf: 'center',
+    marginTop: 18,
+  },
+  nightIndicator: {
+    backgroundColor: theme.colors.itemColor,
+    borderRadius: 5000,
+    width: 50,
+    left: 12,
+    position: 'absolute',
+    elevation: -1,
+
+    // transform: [{ scaleY: 300 }],
+  },
+
+  timeIcon: {
+    alignSelf: 'center',
+    marginTop: 15,
   },
 
   day: {
@@ -206,9 +337,22 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
     margin: 10,
-    marginTop: 13,
+    marginTop: 22,
     alignSelf: 'flex-start',
     borderRadius: 50000,
+    elevation: 3,
+  },
+
+  bar: {
+    width: 8,
+    alignSelf: 'center',
+    position: 'absolute',
+    height: 2,
+    backgroundColor: theme.colors.accent,
+    borderRadius: 50000,
+    elevation: 5,
+    shadowColor: theme.colors.accent,
+    shadowOpacity: 1,
   },
 
   line: {
@@ -219,5 +363,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.itemColor,
     width: 2,
     height: 0,
+
+    elevation: 3,
   },
 });

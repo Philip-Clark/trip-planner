@@ -92,7 +92,6 @@ export default function Day({ route, navigation }) {
       );
     });
   };
-
   return (
     <View style={[styles.container, editMode && styles.editModeContainer]}>
       <Header
@@ -100,6 +99,7 @@ export default function Day({ route, navigation }) {
         backTo={'Trip'}
         navigation={navigation}
         subtitle={tripName}
+        style={{ marginLeft: 20 }}
       >
         {editMode ? (
           <OpacityButton
@@ -135,12 +135,12 @@ export default function Day({ route, navigation }) {
       <FlatList
         style={styles.days}
         data={events}
-        contentContainerStyle={{ paddingBottom: 300, paddingTop: 10 }}
+        contentContainerStyle={{ paddingBottom: 300, paddingTop: 50 }}
         renderItem={({ item }) =>
           /* A custom component that is used to animate the events. */
           item.type != 'travel' &&
           item.name != '' && (
-            <SlideInView offset={events.indexOf(item)}>
+            <SlideInView offset={1}>
               {/* EVENT */}
               <EventTimeLine item={item} eventUnsorted={events} date={route.params.date}>
                 {/* EVENT CARD */}
@@ -256,9 +256,12 @@ export default function Day({ route, navigation }) {
 /* A style sheet. */
 const styles = StyleSheet.create({
   container: {
+    borderColor: theme.colors.white,
+    borderWidth: 5,
     flex: 1,
     backgroundColor: theme.colors.white,
-    padding: 20,
+    padding: 15,
+    paddingLeft: 0,
   },
 
   icon: {
@@ -275,20 +278,16 @@ const styles = StyleSheet.create({
 
   editModeContainer: {
     borderColor: theme.colors.accent,
-    borderWidth: 5,
-    padding: 15,
-  },
-
-  days: {
-    paddingTop: 20,
   },
 
   saveButton: {
-    paddingTop: 5,
-    paddingBottom: 5,
+    paddingVertical: 6,
+    marginVertical: 0,
     paddingHorizontal: 15,
     backgroundColor: theme.colors.accent,
     borderRadius: 500,
+    elevation: 20,
+    shadowColor: theme.colors.accent,
   },
 
   addList: {
@@ -327,6 +326,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
+    elevation: theme.sizes.standardElevation,
+    marginHorizontal: 5,
   },
 
   departure: {
@@ -378,6 +379,8 @@ const styles = StyleSheet.create({
     padding: 20,
     color: theme.colors.text,
     alignSelf: 'flex-end',
+    elevation: 5,
+    shadowColor: theme.colors.accent,
   },
 });
 
