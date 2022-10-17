@@ -26,17 +26,17 @@ export const theme = {
     accent: '#67dfe8',
   },
   // ? DARK theme
-  colors: {
-    white: '#252525',
-    itemColor: '#363636',
-    text: '#afafaf',
-    modalBackground: '#00000066',
-    accent: '#d55252',
-  },
+  // colors: {
+  //   white: '#252525',
+  //   itemColor: '#363636',
+  //   text: '#afafaf',
+  //   modalBackground: '#00000066',
+  //   accent: '#d55252',
+  // },
 
   sizes: {
     borderRadius: 5,
-    standardElevation: 2,
+    standardElevation: 0.0,
     // borderRadius: 50,
   },
 };

@@ -35,10 +35,29 @@ export default function App() {
     };
   };
 
+  const snappy = ({ current, next, inverted, layouts: { screen } }) => {
+    const progress = Animated.add(
+      current.progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 1],
+        extrapolate: 'clamp',
+      }),
+      next
+        ? next.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+            extrapolate: 'clamp',
+          })
+        : 0
+    );
+
+    return {};
+  };
+
   const Stack = createStackNavigator();
 
   const screenOptions = {
-    cardStyleInterpolator: fadeTransition,
+    ...TransitionPresets.DefaultTransition,
     cardOverlay: () => (
       <View
         style={{
