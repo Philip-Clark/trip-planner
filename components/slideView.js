@@ -27,6 +27,7 @@ export default function SlideInView({ offset, children }) {
       style={{
         transform: [{ translateX: slideAnim }],
         opacity: fadeAnim,
+        overflow: 'visible',
       }}
     >
       {children}

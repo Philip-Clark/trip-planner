@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: theme.sizes.borderRadius,
     marginVertical: 5,
+    alignItems: 'center',
   },
 
   buttonText: {

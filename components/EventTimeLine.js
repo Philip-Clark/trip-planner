@@ -62,17 +62,20 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   const lastTime = new Date(tempSplitDate.join(' ')).getTime();
   const lastTimeString = tempSplitDate[4];
 
+  tempSplitDate[4] = '18:00';
+  const nightTimeStart = new Date(tempSplitDate.join(' ')).getTime();
+
   /**
     Returns the difference in time between the currentTime and nextTime. 
   */
-  const getTimeDifference = () => {
+  const getTimeDifference = (timeA = nextTime, timeB = thisTime) => {
     const minimumDiff = 1;
-    const difference = parseFloat(nextTime - thisTime) / 8000000;
+    const difference = parseFloat(timeA - timeB) / 8000000;
     return difference > minimumDiff ? difference * 30 : 1;
   };
 
   const getHalfHeight = () => {
-    return layout.height == undefined ? 0 : layout.height;
+    return layout.height - 10;
   };
 
   const getTopPosition = () => {
@@ -80,9 +83,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
   };
 
   const measureView = (event) => {
-    if (layout.height == 0) {
-      setLayout(event.nativeEvent.layout);
-    }
+    setLayout(event.nativeEvent.layout);
   };
 
   /** 
@@ -102,10 +103,10 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
     -- present: return percentage, 
     -- future: return -1;
   */
-  const getLineSize = () => {
-    if (currentTime < nextTime && currentTime > thisTime) {
+  const getLineSize = (timeA = nextTime) => {
+    if (currentTime < timeA && currentTime > thisTime) {
       return getPercentageOfTimeRange();
-    } else if (currentTime >= nextTime) return 1;
+    } else if (currentTime >= timeA) return 1;
     return -1;
   };
 
@@ -162,12 +163,12 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
 
     if (notLastItem()) {
       if (!isDay(nextTimeString)) {
-        returnHeight = getTimeDifference() + getHalfHeight() + 65;
+        returnHeight = getHalfHeight();
       } else {
-        returnHeight = 60;
+        returnHeight = getHalfHeight();
       }
     } else {
-      returnHeight = getTimeDifference() + getHalfHeight() + 0;
+      returnHeight = getHalfHeight();
     }
 
     return returnHeight;
@@ -181,7 +182,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
 
   return (
     <Animated.View
-      style={[styles.day, { marginBottom: getTimeDifference() }]}
+      style={[styles.day, { paddingBottom: getTimeDifference() }]}
       onLayout={(event) => measureView(event)}
     >
       {/* START TIME */}
@@ -191,11 +192,21 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
             style={[
               styles.nightIndicator,
               {
-                height: getTimeIndicatorHeight(),
+                height:
+                  getHalfHeight() +
+                  (isDay(lastTimeString)
+                    ? getTimeDifference(thisTime, nightTimeStart) + 30
+                    : !notFirstItem()
+                    ? 40
+                    : 20) +
+                  (notLastItem() ? 35 : 0),
                 top:
-                  isDay(lastTimeString) || !notFirstItem()
-                    ? getTopPosition() - 20
-                    : getTopPosition(),
+                  getTopPosition() -
+                  (isDay(lastTimeString)
+                    ? getTimeDifference(thisTime, nightTimeStart) + 15
+                    : !notFirstItem()
+                    ? 20
+                    : 0),
               },
             ]}
           >
@@ -239,29 +250,31 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
           },
         ]}
       >
-        {notLastItem() && (
-          <View>
-            {/* BLUE LINE */}
-            <View
-              style={[
-                styles.line,
-                {
-                  height: getLineSize() * (getTimeDifference() + getHalfHeight()) - 5,
-                  backgroundColor: theme.colors.accent,
-                  shadowColor: theme.colors.accent,
-                },
-              ]}
-            />
-          </View>
-        )}
+        <View>
+          {/* BLUE LINE */}
+          <View
+            style={[
+              styles.line,
+              {
+                height: notLastItem()
+                  ? getLineSize() * getHalfHeight()
+                  : newColorValue == 100
+                  ? 0
+                  : 0,
+                backgroundColor: theme.colors.accent,
+                shadowColor: theme.colors.accent,
+                elevation: 5,
+              },
+            ]}
+          />
+        </View>
+
         {/* GREY LINE */}
         <View
           style={[
             styles.line,
             {
-              height: notLastItem()
-                ? (remaining() < 1 ? remaining() : 1) * (getTimeDifference() + getHalfHeight())
-                : 0,
+              height: notLastItem() ? (remaining() < 1 ? remaining() : 1) * getHalfHeight() : 0,
               shadowColor: theme.colors.itemColor,
             },
             { backgroundColor: theme.colors.itemColor },
@@ -269,12 +282,7 @@ export default function EventTimeLine({ children, item, eventUnsorted, date }) {
         />
 
         {getLineSize() < 1 && getLineSize() > 0 && (
-          <View
-            style={[
-              styles.bar,
-              { top: getLineSize() * (getTimeDifference() + getHalfHeight()) + 5 },
-            ]}
-          />
+          <View style={[styles.bar, { top: getLineSize() * getHalfHeight() + 10 }]} />
         )}
       </Animated.View>
       {children}
@@ -341,6 +349,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: 50000,
     elevation: 3,
+    overflow: 'visible',
   },
 
   bar: {

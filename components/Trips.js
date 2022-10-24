@@ -8,13 +8,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import { Table, Row, Rows } from 'react-native-table-component';
 import { useEffect, useState, setState } from 'react';
 import Header from './Header';
 import addItem, { getData, storeData, removeItem } from './dataHandler';
 import SlideInView from './slideView';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import moment from 'moment/moment';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { renderers } from 'react-native-popup-menu';
@@ -26,8 +25,17 @@ export default function Trips({ navigation }) {
   const [data, setData] = useState([]);
   const [trace, setTrace] = useState({ tripID: '', dayID: '', eventID: '' });
   const [refresh, setRefresh] = useState(0);
+  const [showDataStructure, setShowDataStructure] = useState(false);
   const [importModalVisible, setImportModalVisible] = useState(false);
   const [importFile, setImportFile] = useState('');
+
+  const DemoData = {
+    headers: ['Type', 'Date', 'Arrival', 'Departure', 'Title', 'Info', 'Duration'],
+    rows: [
+      ['Event', 'MM/DD/YYYY', '15:00', '15:30', 'Event Title', 'html/text', ''],
+      ['Drive', 'MM/DD/YYYY', '', '', '', '', 'hh:mm'],
+    ],
+  };
 
   const navigateToTrip = async (tripData) => {
     navigation.navigate('Trip', {
@@ -81,6 +89,20 @@ export default function Trips({ navigation }) {
       >
         <View style={styles.modalDimmer}>
           <View style={styles.modal}>
+            {/* <View style={styles.dataStructurePrompt}>
+              <Text style={{ textAlign: 'center', marginBottom: 10 }}>
+                Acceptable Data Structure
+              </Text>
+
+              <Table
+                borderStyle={{ borderWidth: 1, borderColor: theme.text }}
+                style={styles.dataTable}
+              >
+                <Row data={DemoData.headers} style={styles.headerRow} textStyle={styles.dataText} />
+                <Rows data={DemoData.rows} style={styles.rows} textStyle={styles.dataText} />
+              </Table>
+            </View> */}
+
             <TouchableOpacity style={styles.done} onPress={pickFile}>
               <Text style={styles.fileName}>
                 {importFile != '' ? importFile.name : 'Pick File'}
@@ -105,9 +127,17 @@ export default function Trips({ navigation }) {
       </Modal>
 
       <Header title={'Trips'} back={false}>
-        <Menu renderer={renderers.ContextMenu}>
+        <TouchableOpacity
+          style={styles.importIcon}
+          onPress={() => {
+            setImportModalVisible(true);
+          }}
+        >
+          <MaterialCommunityIcons name="import" size={30} style={styles.options} />
+        </TouchableOpacity>
+        {/* <Menu renderer={renderers.ContextMenu}>
           <MenuTrigger>
-            <Feather name="more-horizontal" size={30} style={styles.options} />
+            <MaterialCommunityIcons name="import" size={30} style={styles.options} />
           </MenuTrigger>
           <MenuOptions customStyles={MenuStyle}>
             <MenuOption
@@ -117,9 +147,10 @@ export default function Trips({ navigation }) {
               text="Import CSV"
             />
           </MenuOptions>
-        </Menu>
+        </Menu> */}
       </Header>
       <FlatList
+        showsVerticalScrollIndicator={false}
         style={styles.trips}
         data={data}
         renderItem={({ item }) => (
@@ -204,6 +235,19 @@ const styles = StyleSheet.create({
     width: 32,
   },
 
+  dataStructurePrompt: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+    backgroundColor: theme.colors.itemColor,
+    paddingHorizontal: 5,
+    paddingVertical: 10,
+    borderRadius: theme.sizes.borderRadius,
+  },
+  dataTable: {},
+  dataText: {
+    fontSize: 10,
+    textAlign: 'center',
+  },
   tripItem: {
     backgroundColor: theme.colors.itemColor,
     display: 'flex',
@@ -218,6 +262,7 @@ const styles = StyleSheet.create({
 
   options: {
     color: theme.colors.text,
+    marginRight: 10,
   },
   tripText: {
     fontSize: 16,
@@ -248,9 +293,9 @@ const styles = StyleSheet.create({
     alignContent: 'space-between',
     flexDirection: 'column',
     backgroundColor: theme.colors.white,
-    margin: 50,
-    padding: 30,
-    marginVertical: 100,
+    margin: 30,
+    padding: 20,
+    marginVertical: 150,
   },
 
   fileName: {

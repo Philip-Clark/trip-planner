@@ -88,6 +88,7 @@ export default function Trip({ route, navigation }) {
       />
       {/* Rendering a list of days. */}
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={tripData.days}
         renderItem={({ item }) => (
           /* A Button that is used to navigate to the next screen. */

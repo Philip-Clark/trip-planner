@@ -26,6 +26,7 @@ export default function Day({ route, navigation }) {
   const [expandAddMenu, setExpandAddMenu] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [tripName, setTripName] = useState('');
+  const [bottomOfList, setBottomOfList] = useState(0);
   const [dayData, setDayData] = useState({});
   const [refresh, setRefresh] = useState(0);
   const [events, setEvents] = useState([]);
@@ -133,8 +134,8 @@ export default function Day({ route, navigation }) {
       </Header>
       {/*A list of events for the day. */}
       <FlatList
-        style={styles.days}
         data={events}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 300, paddingTop: 50 }}
         renderItem={({ item }) =>
           /* A custom component that is used to animate the events. */
@@ -202,7 +203,7 @@ export default function Day({ route, navigation }) {
                         </Text>
                       )
                     ) : (
-                      <View style={{ height: 16 }}></View>
+                      <View style={{ height: 0 }}></View>
                     )
                   }
                 </View>
@@ -214,10 +215,10 @@ export default function Day({ route, navigation }) {
 
       {/* Fade out list view */}
       <LinearGradient
-        colors={['rgba(255, 255, 255, 0)', theme.colors.white]}
-        style={styles.gradient}
+        colors={['#00000000', theme.colors.white]}
+        style={[styles.gradient]}
+        pointerEvents={'none'}
       />
-
       {/* Add event Button */}
       {editMode && (
         <View style={styles.addList}>
@@ -228,7 +229,13 @@ export default function Day({ route, navigation }) {
                 buttonStyle={styles.addOption}
                 text={'Location'}
               >
-                <SimpleLineIcons name="location-pin" size={16} style={styles.icon} />
+                <Text style={{ marginRight: 5 }}>
+                  <SimpleLineIcons
+                    name="location-pin"
+                    size={20}
+                    style={{ colors: theme.colors.text }}
+                  />
+                </Text>
               </OpacityButton>
 
               <OpacityButton
@@ -237,7 +244,9 @@ export default function Day({ route, navigation }) {
                 buttonStyle={styles.addOption}
                 text={'Travel Time'}
               >
-                <Ionicons name="car" size={16} style={styles.icon} />
+                <Text style={{ marginRight: 5 }}>
+                  <Ionicons name="car" size={20} style={{ color: theme.colors.text }} />
+                </Text>
               </OpacityButton>
             </View>
           )}
@@ -264,8 +273,9 @@ const styles = StyleSheet.create({
     paddingLeft: 0,
   },
 
+  // days: { overflow: 'visible' },
+
   icon: {
-    color: theme.colors.text,
     marginRight: 10,
   },
   locationAndTravel: {
@@ -347,10 +357,10 @@ const styles = StyleSheet.create({
   },
 
   gradient: {
-    marginBottom: 0,
-    height: 1,
+    height: 300,
+    position: 'absolute',
+    bottom: 10,
     width: '100%',
-    transform: [{ scaleY: 100 }, { translateY: -0.5 }],
   },
 
   dayText: {
@@ -370,6 +380,7 @@ const styles = StyleSheet.create({
   },
   travel: {
     marginLeft: 10,
+    paddingVertical: 5,
     color: theme.colors.text,
   },
 

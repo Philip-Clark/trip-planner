@@ -41,6 +41,7 @@
     "react-native-screens": "~3.15.0",
     "react-native-select-dropdown": "^2.0.4",
     "react-native-svg": "^12.3.0",
+    "react-native-table-component": "^1.2.2",
     "react-native-web": "~0.18.7",
     "react-native-webview": "11.23.0",
     "react-papaparse": "^4.1.0"

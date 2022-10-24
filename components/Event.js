@@ -164,7 +164,7 @@ export default function Event({ route, navigation }) {
               </View>
             )}
           </View>
-          <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{ marginBottom: 300 }}>
               <RenderHtml
                 baseStyle={{ color: theme.colors.text }}
@@ -179,6 +179,7 @@ export default function Event({ route, navigation }) {
           <LinearGradient
             colors={['rgba(255, 255, 255, 0)', theme.colors.white]}
             style={styles.gradient}
+            pointerEvents={'none'}
           />
         </View>
       )}

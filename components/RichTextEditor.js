@@ -204,6 +204,7 @@ export default function RichTextEditor({ callback, defaultValue, placeholder }) 
             <View>
               <Text style={styles.Title}> Insert HTML </Text>
               <KeyboardAwareScrollView
+                showsVerticalScrollIndicator={false}
                 style={{
                   margin: 5,
                   marginBottom: 25,
