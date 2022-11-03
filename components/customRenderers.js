@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Children, useState } from 'react';
 import { defaultHTMLElementModels, HTMLContentModel } from 'react-native-render-html';
 import { Image, Linking, StyleSheet, Text, View } from 'react-native';
 import { getLinkPreview } from 'link-preview-js';
@@ -42,6 +42,19 @@ const LinkRenderer = function LinkRenderer({ TDefaultRenderer, tnode, ...props }
     </TDefaultRenderer>
   );
 };
+
+const ImageRenderer = function ImageRenderer({ InternalRenderer, tnode, Children, ...props }) {
+  return (
+    <View
+      style={{
+        borderRadius: theme.sizes.borderRadius,
+        overflow: 'hidden',
+      }}
+    >
+      <InternalRenderer tnode={tnode} {...props} />
+    </View>
+  );
+};
 // a Helper function
 export const customHTMLElementModels = {
   a: defaultHTMLElementModels.a.extend({
@@ -49,8 +62,9 @@ export const customHTMLElementModels = {
   }),
 };
 // Export the custom renderer
-export const AnchorRenderer = {
+export const Renderers = {
   a: LinkRenderer,
+  img: ImageRenderer,
 };
 
 const styles = StyleSheet.create({

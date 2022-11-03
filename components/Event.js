@@ -16,7 +16,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import RichTextEditor from './RichTextEditor';
 import RenderHtml from 'react-native-render-html';
-import { AnchorRenderer, customHTMLElementModels } from './customLinkRenderer';
+import { Renderers, customHTMLElementModels } from './customRenderers';
 import { theme } from './Styles';
 import { get12HourTime } from './timeConvert';
 
@@ -170,7 +170,7 @@ export default function Event({ route, navigation }) {
                 baseStyle={{ color: theme.colors.text }}
                 source={{ html: route.params.data.data }}
                 style={styles.text}
-                renderers={AnchorRenderer}
+                renderers={Renderers}
                 customHTMLElementModels={customHTMLElementModels}
               />
             </View>
