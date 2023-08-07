@@ -1,6 +1,6 @@
 ### Trip Planning app
 
-(Work In Progress) A simple React Native trip planning app. This app is a Collaborative effort with a UI designer to build an app that allows for simple trip planning. The focus is on simplistic reading and easy use.
+A simple React Native trip planning app. This app is a Collaborative effort with a UI designer to build an app that allows for simple trip planning. The focus is on simplistic reading and easy use.
 
 
 
